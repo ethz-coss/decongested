@@ -1,3 +1,4 @@
+![](images/coci_logo.png)
 # decongested: circularity in logistics leveraging self-organization in reinforcement learning
 
 ## Background
