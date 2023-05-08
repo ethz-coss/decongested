@@ -9,7 +9,7 @@ DeCongested is a repository built and maintained by the Computational Social Sci
 The main research question guiding this research is:
 > How can self-organization and resilience principles be used in a way that makes cities more sustainable?
 
-This particular project focuses on transport and logistics networks and studies the ability of learning agents to leverage self-organization and continuously learn to share networked resources. This investigation involves frontier research at the intersection of game theory, machine learning, and complex multi agents sysetms.
+This particular project focuses on transport and logistics networks and studies the ability of learning agents to leverage self-organization and continuously learn to share networked resources. This investigation involves frontier research at the intersection of game theory, machine learning, traffic science, and complex systems.
 
 ### Repository Contents
 - dqn_agent contains the functions to run a Deep Q-Learning model
