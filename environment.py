@@ -40,6 +40,7 @@ class roadGrid:
         #     (1, 0): np.array([0, 1, 0, 0]),
         #     (1, 1): np.array([1, 0, 0, 0]),
         # }
+        self.node_last_utilization = {node: np.ones(self.n_actions)/self.n_actions for node in self.G.nodes}
 
     def reset(self):
         self.step_counter = np.zeros(self.n_agents)
@@ -51,6 +52,7 @@ class roadGrid:
         self.done = np.zeros(self.n_agents)
         info = {}
         self.stored_transitions = {}
+        # self.node_last_utilization = {node: np.ones(self.n_actions) / self.n_actions for node in self.G.nodes}
         # state = [self.one_hot_enc[tuple(self.S[n])] for n in range(self.n_agents)]
         remaining_agents = np.ones(self.n_agents, dtype=bool)
         first_agents = remaining_agents
@@ -76,6 +78,27 @@ class roadGrid:
 
         return np.concatenate([node, pct_occupied, uniform_belief_counterfactual])
 
+    # def partial_observation(self, agent):
+    #     tuple_state = tuple(self.S[agent])
+    #     node = self.one_hot_enc[tuple_state]
+    #     pct_occupied = np.array([self.states_counts[tuple_state] / self.n_agents])
+    #     edges = self.G.edges(tuple_state)
+    #
+    #     if len(edges) == 4:
+    #         agents_on_outgoing_edges = np.array([self.agents_in_transit[edge[0], edge[1]] / self.n_agents for edge in edges])
+    #     else:
+    #         edges = list(edges) + [self.base_state for i in range(4 - len(edges))]
+    #         agents_on_outgoing_edges = np.array([self.agents_in_transit[edge[0], edge[1]] / self.n_agents for edge in edges])
+    #
+    #     return np.concatenate([node, pct_occupied, agents_on_outgoing_edges])
+
+    # def partial_observation(self, agent):
+    #     tuple_state = tuple(self.S[agent])
+    #     node = self.one_hot_enc[tuple_state]
+    #     pct_occupied = np.array([self.states_counts[tuple_state] / self.n_agents])
+    #
+    #     return np.concatenate([node, pct_occupied, self.node_last_utilization[tuple_state]])
+
     def partial_observation(self, agent):
         tuple_state = tuple(self.S[agent])
         node = self.one_hot_enc[tuple_state]
@@ -88,7 +111,13 @@ class roadGrid:
             edges = list(edges) + [self.base_state for i in range(4 - len(edges))]
             agents_on_outgoing_edges = np.array([self.agents_in_transit[edge[0], edge[1]] / self.n_agents for edge in edges])
 
-        return np.concatenate([node, pct_occupied, agents_on_outgoing_edges])
+        return np.concatenate([node, pct_occupied, agents_on_outgoing_edges, self.node_last_utilization[tuple_state]])
+
+    # def partial_observation(self, agent):
+    #     tuple_state = tuple(self.S[agent])
+    #     node = self.one_hot_enc[tuple_state]
+    #     pct_occupied = np.array([self.states_counts[tuple_state] / self.n_agents])
+    #     return np.concatenate([node, pct_occupied])
 
     def _return_0(self):
         return 0
@@ -101,6 +130,10 @@ class roadGrid:
         actions = actions.flatten()
         counts = np.bincount(actions, minlength=self.n_actions)
         self.actions_taken[self.base_state[0], self.base_state[1]] += counts
+
+        ema_coefficient = 0.9
+        pct_counts = counts/counts.sum()
+        self.node_last_utilization[tuple(self.base_state)] = ema_coefficient * self.node_last_utilization[tuple(self.base_state)] + (1 - ema_coefficient) * pct_counts
 
         # calculate rewards
         neighbour_nodes = [edge[1] for edge in self.G.edges(self.base_state)]
@@ -166,7 +199,7 @@ class roadGrid:
                 "reward": reward
             }
             self.step_counter[n] += 1
-            self.current_state[n] = self.counterfactual_observation(n)
+            # self.current_state[n] = self.counterfactual_observation(n)
 
         # next_state = [self.counterfactual_observation(agent) for agent in range(self.n_agents)]  # state vector for all agents
 
@@ -199,16 +232,17 @@ class roadGrid:
                 #     for agent in base_state_indices
                 # ]
 
-                counterfactual_beliefs = [
-                    drivers[int(agent)].judge_state(
-                        state=torch.tensor(self.current_state[int(agent)], dtype=torch.float32, device=device)
-                    ) for agent in base_state_indices
-                ]
+                # counterfactual_beliefs = [
+                #     drivers[int(agent)].judge_state(
+                #         state=torch.tensor(self.current_state[int(agent)], dtype=torch.float32, device=device)
+                #     ) for agent in base_state_indices
+                # ]
 
-                counterfactual_beliefs = torch.stack(counterfactual_beliefs)
-                counterfactual_beliefs = counterfactual_beliefs.cpu().numpy()
-                base_state_counterfactual = np.mean(counterfactual_beliefs, axis=0)
-                complete_state = np.concatenate([self.current_state[int(base_state_indices[0])][0:-4], base_state_counterfactual])
+                # counterfactual_beliefs = torch.stack(counterfactual_beliefs)
+                # counterfactual_beliefs = counterfactual_beliefs.cpu().numpy()
+                # base_state_counterfactual = np.mean(counterfactual_beliefs, axis=0)
+                # complete_state = np.concatenate([self.current_state[int(base_state_indices[0])][0:-4], base_state_counterfactual])
+                complete_state = self.partial_observation(int(base_state_indices[0]))
                 #
                 # [
                 #     np.concatenate([self.current_state[agent][0:-4], base_state_counterfactual])
@@ -222,7 +256,7 @@ class roadGrid:
                     self.stored_transitions[int(n)]["next_state"] = state_
                     transitions.append((int(n), self.stored_transitions[int(n)]))
                     self.current_state[int(n)] = complete_state
-                    self.step_counter[int(n)] += 1
+                    # self.step_counter[int(n)] += 1
 
                 finished_indices = np.argwhere((self.agents_at_final_state * fastest_agents) == True)
                 for n in finished_indices:
@@ -231,14 +265,14 @@ class roadGrid:
                     self.agents_in_transit[edge] -= 1
                     transitions.append((int(n), self.stored_transitions[int(n)]))
                     self.current_state[int(n)] = None
-                    self.step_counter[int(n)] += 1
+                    # self.step_counter[int(n)] += 1
         else:
             done = True
             self.base_state = None
             self.agents_at_base_state = None
             transitions = []
 
-        self.step_counter += 1
+        # self.step_counter += 1
         # self.current_state = next_state
 
         return self.current_state, self.base_state, self.agents_at_base_state, transitions, done

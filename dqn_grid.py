@@ -15,7 +15,6 @@ from dqn_agent import model
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-
 if __name__ == "__main__":
     from environment import roadGrid
     from networkx import grid_graph
@@ -25,7 +24,7 @@ if __name__ == "__main__":
     size = 4
     G = grid_graph(dim=(size, size))
     for e in G.edges():
-        G.edges[e]["cost"] = lambda x: 1 + x/100
+        G.edges[e]["cost"] = lambda x: 1 + x / 100
 
     # G = nx.DiGraph()
     # G.add_nodes_from([(0, 0), (0, 1), (1, 0), (1, 1)])
@@ -63,28 +62,37 @@ if __name__ == "__main__":
     # nx.draw(G, pos=positions, ax=ax)
     # plt.show()
 
+    LOAD_SAVED_DRIVERS = False
+
     n_agents = 100
     n_actions = 4
     n_states = 4
-    n_iter = 1000
-    episode_timeout = 128
+    n_iter = 2000
+    episode_timeout = 16
 
     BATCH_SIZE = 4
     GAMMA = 0.9
     EPS_START = 0.9
-    EPS_END = 0.01
-    EPS_DECAY = n_iter  # larger is slower
+    EPS_END = 0.05
+    EPS_DECAY = n_iter * 4  # larger is slower
     TAU = 0.05  # TAU is the update rate of the target network
     LR = 1e-2  # LR is the learning rate of the AdamW optimizer
-    NAME = f"dqn_grid_N{n_agents}_I{n_iter}_S{len(G.nodes())}_B{BATCH_SIZE}_EXP{EPS_START-EPS_END}_G{GAMMA}_LR{LR}"
+    NAME = f"dqn_grid_egreedy_iot_N{n_agents}_I{n_iter}_S{len(G.nodes())}_B{BATCH_SIZE}_EXP{EPS_START - EPS_END}_G{GAMMA}_LR{LR}"
 
-    n_observations = int(size*2) + n_actions + 1  # state space
+    n_observations = int(size * 2) + 2 * n_actions + 1  # state space
 
-    drivers = {}
-    for n in range(n_agents):
-        drivers[n] = model(
-            n_observations, n_actions, device, LR, TAU, GAMMA, BATCH_SIZE=BATCH_SIZE, max_memory=1000
-        )
+    if LOAD_SAVED_DRIVERS:
+        with open(f"drivers_{NAME}", "rb") as file:
+            drivers = pickle.load(file)
+            NAME = f"{NAME}_pretrained"
+            for driver in drivers.values():
+                driver.steps_done = 0
+    else:
+        drivers = {}
+        for n in range(n_agents):
+            drivers[n] = model(
+                n_observations, n_actions, device, LR, TAU, GAMMA, BATCH_SIZE=BATCH_SIZE, max_memory=1000
+            )
 
     data = {}
 
@@ -95,6 +103,10 @@ if __name__ == "__main__":
     #         torch.tensor(np.array(env.one_hot_enc[(0, 0)]), dtype=torch.float32,
     #                      device=device).unsqueeze(0)) for
     #      driver in drivers.values()])
+
+    def softmax_stable(x, temp=0.01):
+        return np.exp((x - np.max(x)) / temp) / np.exp((x - np.max(x)) / temp).sum()
+
 
     for t in range(n_iter):
         state, info, base_state, agents_at_base_state = env.reset()
@@ -117,6 +129,24 @@ if __name__ == "__main__":
             #     np.concatenate([state[agent][0:-4], base_state_counterfactual])
             #     for n, agent in drivers.items() if agents_at_base_state[n]
             # ]
+
+            # beliefs = [
+            #     driver.judge_state(
+            #         state=torch.tensor(state[n], dtype=torch.float32, device=device)
+            #     )
+            #     for n, driver in enumerate(drivers.values()) if agents_at_base_state[n]]
+            #
+            # beliefs = torch.stack(beliefs)
+            # beliefs = beliefs.cpu().numpy()
+            # base_state_beliefs = np.mean(beliefs, axis=0)
+            # n_agents_at_base_state = agents_at_base_state.sum()
+            # probabilities = softmax_stable(base_state_beliefs)
+            #
+            # actions = np.random.choice(
+            #     np.arange(n_actions),
+            #     size=n_agents_at_base_state,
+            #     p=probabilities
+            # )
 
             action_list = [
                 driver.select_action(
@@ -166,7 +196,8 @@ if __name__ == "__main__":
             "A": env.actions_taken,  # convert it to numpy from a tensor only at the end of the simulation
             "trajectory": env.trajectory,
             "success": env.agents_at_final_state,
-            "loss": drivers[0].loss
+            "loss": drivers[0].loss,
+            "steps": env.step_counter,
         }
 
     # beliefs = [
