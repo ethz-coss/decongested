@@ -35,8 +35,8 @@ class DQN(nn.Module):
 
     def __init__(self, n_observations, n_actions):
         super(DQN, self).__init__()
-        self.layer1 = nn.Linear(n_observations, 16)
-        self.layer2 = nn.Linear(16, 16)
+        self.layer1 = nn.Linear(n_observations, 32)
+        self.layer2 = nn.Linear(32, 16)
         self.layer3 = nn.Linear(16, n_actions)
 
     # Called with either one element to determine next action, or a batch
@@ -79,7 +79,7 @@ class model:
             return self.policy_net(state)
 
     def select_action(self, state, EPS_END=0.01, EPS_START=0.9,
-                      EPS_DECAY=1000):  # epsilon greedy action selection, perfect
+                      EPS_DECAY=1000, method="random", neighbour_beliefs=None):  # epsilon greedy action selection, perfect
         sample = random.random()
         self.eps_threshold = EPS_END + (EPS_START - EPS_END) * \
                         math.exp(-1. * self.steps_done / EPS_DECAY)  # epsilon is decayed manually
@@ -95,7 +95,10 @@ class model:
                 # z = x.view(1, 1)
                 return self.policy_net(state).max(-1)[1].view(1, 1)  # changed max(1) to max(0) fixing bug
         else:
-            return torch.tensor([[np.random.randint(self.n_actions)]], device=self.device, dtype=torch.long)
+            if method == "random":
+                return torch.tensor([[np.random.randint(self.n_actions)]], device=self.device, dtype=torch.long)
+            elif method == "neighbours":
+                return torch.tensor([[np.argmax(neighbour_beliefs)]], device=self.device, dtype=torch.long)
 
     def optimize_model(self):
         if len(self.memory) < self.batch_size:

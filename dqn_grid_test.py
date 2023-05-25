@@ -21,10 +21,10 @@ if __name__ == "__main__":
     import networkx as nx
     import numpy as np
 
-    size = 4
-    G = grid_graph(dim=(size, size))
-    for e in G.edges():
-        G.edges[e]["cost"] = lambda x: 1 + x / 100
+    # size = 4
+    # G = grid_graph(dim=(size, size))
+    # for e in G.edges():
+    #     G.edges[e]["cost"] = lambda x: 1 + x / 100
 
     # G = nx.DiGraph()
     # G.add_nodes_from([(0, 0), (0, 1), (1, 0), (1, 1)])
@@ -46,16 +46,16 @@ if __name__ == "__main__":
     # G.adj[(0, 0)][(0, 1)]["cost"] = lambda x: 0.5
     # G.adj[(0, 1)][(1, 1)]["cost"] = lambda x: 0.5
 
-    # size = 4
-    # G = nx.DiGraph()
-    # G.add_nodes_from([(0, 0), (1, 1), (2, 2), (3, 3)])
-    # G.add_edges_from([
-    #     ((0, 0), (1, 1), {"cost": lambda x: x/100}),
-    #     ((0, 0), (2, 2), {"cost": lambda x: 1}),
-    #     ((1, 1), (2, 2), {"cost": lambda x: 0}),
-    #     ((1, 1), (3, 3), {"cost": lambda x: 1}),
-    #     ((2, 2), (3, 3), {"cost": lambda x: x/100}),
-    # ])
+    size = 4
+    G = nx.DiGraph()
+    G.add_nodes_from([(0, 0), (1, 1), (2, 2), (3, 3)])
+    G.add_edges_from([
+        ((0, 0), (1, 1), {"cost": lambda x: x/100}),
+        ((0, 0), (2, 2), {"cost": lambda x: 1}),
+        ((1, 1), (2, 2), {"cost": lambda x: 0}),
+        ((1, 1), (3, 3), {"cost": lambda x: 1}),
+        ((2, 2), (3, 3), {"cost": lambda x: x/100}),
+    ])
 
     # positions = {node: node for node in G.nodes()}
     # fig, ax = plt.subplots(figsize=(8, 6))
