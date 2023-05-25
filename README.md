@@ -18,11 +18,47 @@ This particular project focuses on transport and logistics networks and studies 
 - environment contains the environment classes that implement the decentralized and asynchronous multi-player atomic routing simulation 
 
 
+## Introduction
+Multi agent systems require coordination to achieve system optimal performance. Except for few simple cases, this coordination can not be achieved without explicit collaboration, reliably. 
+
+Cities create the playground within which a rich multi agent system can develop. Within this multi agent system we can identify on the basis of simplified perspectives that there are many simultaneous, concurrent 'games' that agents engage in. By games, we intend the game theoretic understanding of a game: a setting defined by a set of players, a set of actions, and a means of assigning value/utility/payoff/cost to the possible outcomes as constrained by a the chosen actions of all players. Games are simplified settings within which we may begin to quantitatively study the complex playgrounds that cities create.
+
+In this project we focus on a the particular games that can be found within transportation and logistics, that can be found whenever there are shared resources that many seek to use simultaneously, but that all wish they could be the sole users of. We are thinking particularly of route choice in cities, pickup and delivery in cities, and packet routing on the internet. Over the years, each of these domains has been 'gameified', and described through the lens of congestion games.
+
+Congestion games are in their simplest form a game where $N$ players share a set of $K$ resources, where the utility of using resource $k$ given that $m$ players pick it is a monotonically decreasing function $u_k(m)$ in $m$. In other words, when many pick the same resource they 'congest' and reduce the experienced utility for each other. We can readily imagine such situations in traffic: when many drivers pick the same road they create traffic jams which slow everyone down. 
+
+What is even more interesting in Cities, and why such research has relevance beyond the theoretical results it can provide, is that traffic jams on single roads can have consequences that extend beyond those roads, even beyond traffic: e.g. drivers change their paths to avoid that road, drivers take to walking or public transport, pollution levels increase which may affect the value of real estate. Cities are open systems, which means that the games played locally by a subset of individuals may have consequences for the players of the many concurrent games that occur in the neighbourhood of the game.
+
+In this paper we take MDP congestion games as our ground model, create a simulation framework to test reinforcement learning algorithms, and explore the online collaborative learning potential of reinforcement learning agents that learn to be more circular over time by sharing their knowledge and experience of the networked repeated congestion games that they play.
+
+**Research Questions**
+- How can self-organization and resilience principles be used in a way that makes cities more sustainable?
+- How can local interaction rules enable effective Online Collaborative MARL?
+- How can circularity be defined in the context of logistics and transportation?
+
 ## Background
 
 ### Routing, route choice, congestion games
 
-### Circular economics, logistics  
+**Congestion Games** complexity of pure NE \cite{fabrikant2004complexity}. For symmetric games, pure NE can be computed in polynomial time with the potential function. For general games complexity is PLS-complete. Atomic Congestion Games introduced in \cite{tekin2012atomic}.
+
+**MDP Congestion Games tolling**, changing the reward function, to acoid convestion \cite{li2019tolling}. Considered continuous MDPCG. Also \cite{calderone2017markov} do similar work, with continuous MDPCG. Extended in \cite{li2022congestion} to robot path planning to avoid congestion in warehouses.
+
+**Decentralized Training, Online Learning** \cite{gaborattention} preprint proposing a method for decentralized training. 
+
+**Logistics, Pick-up and Delivery Problems**
+A review classification and survey of Static PDP \cite{berbeglia2007static}. Large Neighbourhood Search Heuristics first introduced in \cite{shaw1998using} and very successful for solving routing problems. PDP-TW, for pickups with time windows \cite{ropke2006adaptive}. PDPTW-SL for pickup with time windows and scheduled lines of public transport \cite{ghilas2016adaptive}. Centralized Approaches. Hardly Adaptive. 
+
+**Demand Adaptive Systems** Desiging the master schedule \cite{crainic2012designing}.
 
 ### Reinforcement learning
+
+**COMA** achieves difference style rewards \cite{tumer2007distributed}, for counterfactuals, such that agents can compare the what if scenarios of their alternative actions. However, this relies on a centralized critic trained during training. Also from Foerster \cite{foerster2018counterfactual}.
+
+**Learning to Communicate, RIAL** \cite{foerster2016learning} Few agents. Create Deep Learning protocol for differentiable message passing between agents, and solve some simple multi player games: switch riddle (3 and 4 agents), and MNIST games (2 agents). Highly Cited Research.
+
+**MACKRL** uses a common knowledge framework to train a multi agent system of reinforcement learners \cite{schroeder2019multi}. Simply assumes a common knowledge function, accessible in both training and testing to the independent RL agents, in a Dec-POMDP.
+
+**Collective Intelligence for Deep Learning**
+\cite{ha2022collective} survey state of the art ways in which multi agent systems are developed with deep learning, for large systems with MANY agents. Many agent reinforcement learning. They break it down into Image Processing, Deep Reinforcement Learning, Multi Agent Learning, and Meta Learning. Cool self-organization on GraphNNs in \cite{grattarola2021learning}. 
 
