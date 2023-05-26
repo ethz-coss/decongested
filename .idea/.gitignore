@@ -1,0 +1,7 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+experiments/
+pretrained_models/
+papers/
+dqn_results/
