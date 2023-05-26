@@ -9,8 +9,19 @@ Transition = namedtuple('Transition',
 
 
 class roadGridOnline:
-    def __init__(self, graph, n_agents, n_actions, size, next_destination_method):
+    def __init__(self, graph, n_agents, n_actions, size, next_destination_method, agents_see_iot_nodes):
+        self.agents_see_iot_nodes = agents_see_iot_nodes
         self.next_destination_method = next_destination_method
+        self.work_commute_destinations = {}
+        if self.next_destination_method == "work-commute":
+            # generate work-commute OD pairs
+            for n in range(n_agents):
+                origin = np.random.randint(0, size, size=2)
+                destination = np.random.randint(0, size, size=2)
+                while (origin == destination).all():
+                    destination = np.random.randint(0, size, size=2)
+                self.work_commute_destinations[n] = [origin, destination]
+
         self.destinations_counts = None
         self.stored_transitions = None
         self.current_state = None
@@ -38,15 +49,21 @@ class roadGridOnline:
             (l, r) in self.G.nodes()}
         self.training_visitation_counts = defaultdict(self._return_0)
         self.node_last_utilization = {node: np.ones(self.n_actions) / self.n_actions for node in self.G.nodes}
-        self.trips = defaultdict(lambda: [tuple([0, 0, 0])])
+        self.trips = defaultdict(lambda: [tuple([0, 0, np.array([0, 0])])])
         self.average_trip_time = self.size * 2
 
     def reset(self):
         self.step_counter = np.zeros(self.n_agents)
         self.T = np.zeros(self.n_agents)
         self.S = np.zeros((self.n_agents, 2)).astype(int)  # two dim, for two dim states
-        self.destinations = np.ones((self.n_agents, 2)) * np.array(
-            [self.size - 1, self.size - 1])  # np.random.randint(0, 7, size=(self.n_agents, 2))
+
+        self.destinations = np.ones((self.n_agents, 2)) * np.array([self.size - 1, self.size - 1])
+        if self.next_destination_method == "work-commute":
+            for agent, od_pair in self.work_commute_destinations.items():
+                next_destination = od_pair.pop()
+                self.destinations[agent] = next_destination
+                od_pair.insert(0, next_destination)
+
         self.actions_taken = np.zeros((self.size, self.size, self.n_actions)).astype(int)
         self.trajectory = []
         self.done = np.zeros(self.n_agents)
@@ -75,6 +92,10 @@ class roadGridOnline:
         edges = self.G.edges(tuple_state)
         destination = self.one_hot_enc[tuple(self.destinations[agent])]
 
+        utilization = np.zeros(self.n_actions)
+        if self.agents_see_iot_nodes:
+            utilization = self.node_last_utilization[tuple_state]
+
         if len(edges) == 4:
             agents_on_outgoing_edges = np.array(
                 [self.agents_in_transit[edge[0], edge[1]] / self.n_agents for edge in edges])
@@ -84,7 +105,7 @@ class roadGridOnline:
                 [self.agents_in_transit[edge[0], edge[1]] / self.n_agents for edge in edges])
 
         return np.concatenate(
-            [node, destination, pct_occupied, agents_on_outgoing_edges, self.node_last_utilization[tuple_state]])
+            [node, destination, pct_occupied, agents_on_outgoing_edges, utilization])
 
     def _return_0(self):
         return 0
@@ -205,6 +226,10 @@ class roadGridOnline:
         elif method == "random":
             self.destinations[agent] = np.random.randint(0, self.size, size=2)
 
+        elif method == "work-commute":
+            next_destination = self.work_commute_destinations[int(agent)].pop()
+            self.work_commute_destinations[int(agent)].insert(0, next_destination)
+            self.destinations[int(agent)] = next_destination
         else:
             raise "method not found"
 

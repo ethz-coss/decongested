@@ -14,31 +14,35 @@ import pickle
 
 from dqn_agent import model, ReplayMemory
 
+from environment import roadGridOnline
+from networkx import grid_graph
+import networkx as nx
+import numpy as np
+from pathlib import Path
+import copy
+
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-if __name__ == "__main__":
-    from environment import roadGridOnline
-    from networkx import grid_graph
-    import networkx as nx
-    import numpy as np
-    from pathlib import Path
-    import copy
 
+def main(n_iter, next_destination_method="simple", exploration_method="random", agents_see_iot_nodes=True,
+         save_path="experiments"):
     SIZE = 4
     G = grid_graph(dim=(SIZE, SIZE))
     for e in G.edges():
         G.edges[e]["cost"] = lambda x: 1 + x / 100
     ENVIRONMENT = f"symmetric_grid_S{len(G.nodes())}"
-    Path(f"experiments/{ENVIRONMENT}").mkdir(parents=True, exist_ok=True)
+    Path(f"{save_path}/{ENVIRONMENT}").mkdir(parents=True, exist_ok=True)
 
     N_AGENTS = 100
     N_ACTIONS = 4
     N_STATES = 4
     N_OBSERVATIONS = int(SIZE * 2) * 2 + 2 * N_ACTIONS + 1  # state space
     EPISODE_TIMEOUT = 16
-    NEXT_DESTINATION_METHOD = "random"
+    NEXT_DESTINATION_METHOD = next_destination_method
 
-    N_ITER = 100000
+    AGENTS_SEE_IOT_NODES = agents_see_iot_nodes
+
+    N_ITER = n_iter
     BATCH_SIZE = 64
     GAMMA = 0.9
     EPS_START = 0.5
@@ -46,8 +50,8 @@ if __name__ == "__main__":
     EPS_DECAY = N_ITER / 1000  # larger is slower
     TAU = 0.05  # TAU is the update rate of the target network
     LR = 1e-2  # LR is the learning rate of the AdamW optimizer
-    EXPLORATION_METHOD = "neighbours"
-    AGENTS = f"dqn_{N_OBSERVATIONS}_exploration_{EXPLORATION_METHOD}"
+    EXPLORATION_METHOD = exploration_method
+    AGENTS = f"dqn_{N_OBSERVATIONS}_exploration_{EXPLORATION_METHOD}_iot_{AGENTS_SEE_IOT_NODES}"
     TRAINING_SETTINGS = f"N{N_AGENTS}_dex-{NEXT_DESTINATION_METHOD}_I{N_ITER}_B{BATCH_SIZE}_EXP{EPS_START - EPS_END}_G{GAMMA}_LR{LR}"
     PATH = f"experiments/{ENVIRONMENT}/{AGENTS}_{TRAINING_SETTINGS}"
     Path(PATH).mkdir(parents=True, exist_ok=True)
@@ -77,7 +81,8 @@ if __name__ == "__main__":
         n_agents=N_AGENTS,
         n_actions=N_ACTIONS,
         size=SIZE,
-        next_destination_method=NEXT_DESTINATION_METHOD
+        next_destination_method=NEXT_DESTINATION_METHOD,
+        agents_see_iot_nodes=AGENTS_SEE_IOT_NODES
     )
 
     state, info, base_state, agents_at_base_state = env.reset()
@@ -105,6 +110,7 @@ if __name__ == "__main__":
                 EPS_END=EPS_END,
                 EPS_START=EPS_START,
                 EPS_DECAY=EPS_DECAY,
+                method=EXPLORATION_METHOD,
                 neighbour_beliefs=neighbour_beliefs).unsqueeze(0)
             for n, driver in enumerate(drivers.values()) if agents_at_base_state[n]]
         A = torch.cat(action_list)
@@ -126,8 +132,9 @@ if __name__ == "__main__":
 
         # SAVE PROGRESS DATA[agents]
         data[t] = {
-            "T": env.T,
-            "S": env.S,
+            # "T": env.T,
+            # "S": env.S,
+            "average_trip_time": env.average_trip_time
         }
 
     with open(f"{PATH}/data", "wb") as file:
@@ -137,7 +144,32 @@ if __name__ == "__main__":
         pickle.dump(drivers, file)
 
     with open(f"{PATH}/trips", "wb") as file:
-        pickle.dump(env.trips, file)
+        pickle.dump(dict(env.trips), file)  # calling `dict' to offset defaultdict lambda for pickling
 
     with open(f"{PATH}/trajectory", "wb") as file:
         pickle.dump(env.trajectory, file)
+
+
+if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('n_iter', type=int)
+    parser.add_argument('next_destination_method', type=str)
+    parser.add_argument('exploration_method', type=str)
+    parser.add_argument('iot_nodes', type=bool)
+    parser.add_argument('save_path', type=bool)
+    args = parser.parse_args()
+
+    N_ITER = args.n_iter
+    NEXT_DESTINATION_METHOD = args.next_destination_method
+    EXPLORATION_METHOD = args.exploration_method
+    AGENTS_SEE_IOT_NODES = args.iot_nodes
+
+    main(
+        n_iter=N_ITER,
+        next_destination_method=NEXT_DESTINATION_METHOD,
+        exploration_method=EXPLORATION_METHOD,
+        agents_see_iot_nodes=AGENTS_SEE_IOT_NODES,
+        save_path=args.save_path
+    )
