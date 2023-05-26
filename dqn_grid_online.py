@@ -20,6 +20,7 @@ import networkx as nx
 import numpy as np
 from pathlib import Path
 import copy
+import plotting
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -53,7 +54,7 @@ def main(n_iter, next_destination_method="simple", exploration_method="random", 
     EXPLORATION_METHOD = exploration_method
     AGENTS = f"dqn_{N_OBSERVATIONS}_exploration_{EXPLORATION_METHOD}_iot_{AGENTS_SEE_IOT_NODES}"
     TRAINING_SETTINGS = f"N{N_AGENTS}_dex-{NEXT_DESTINATION_METHOD}_I{N_ITER}_B{BATCH_SIZE}_EXP{EPS_START - EPS_END}_G{GAMMA}_LR{LR}"
-    PATH = f"experiments/{ENVIRONMENT}/{AGENTS}_{TRAINING_SETTINGS}"
+    PATH = f"{save_path}/{ENVIRONMENT}/{AGENTS}_{TRAINING_SETTINGS}"
     Path(PATH).mkdir(parents=True, exist_ok=True)
 
     LOAD_PRETRAINED_MODEL = True
@@ -137,9 +138,13 @@ def main(n_iter, next_destination_method="simple", exploration_method="random", 
             "average_trip_time": env.average_trip_time
         }
 
+    plotting.generate_plots(env.trips, N_AGENTS, PATH)
+
     with open(f"{PATH}/data", "wb") as file:
         pickle.dump(data, file)
 
+    for driver in drivers.values():
+        driver.memory = ReplayMemory(10000)  # clear buffer for storage
     with open(f"{PATH}/drivers", "wb") as file:
         pickle.dump(drivers, file)
 
