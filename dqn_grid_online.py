@@ -135,7 +135,8 @@ def main(n_iter, next_destination_method="simple", exploration_method="random", 
         data[t] = {
             # "T": env.T,
             # "S": env.S,
-            "average_trip_time": env.average_trip_time
+            "average_trip_time": env.average_trip_time,
+            "transitions": transitions,
         }
 
     # plotting.generate_plots(env.trips, N_AGENTS, PATH)
