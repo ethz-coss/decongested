@@ -138,7 +138,7 @@ def main(n_iter, next_destination_method="simple", exploration_method="random", 
             "average_trip_time": env.average_trip_time
         }
 
-    plotting.generate_plots(env.trips, N_AGENTS, PATH)
+    # plotting.generate_plots(env.trips, N_AGENTS, PATH)
 
     with open(f"{PATH}/data", "wb") as file:
         pickle.dump(data, file)
