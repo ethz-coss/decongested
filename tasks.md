@@ -77,11 +77,11 @@ tasks
       - independent agents, learn independently with local information and **random** exploration
       - collective agents, learn independently with local information and **shared** exploration
 - how will system performance be calculated when the learning is live online?
-  - calculate the average time it takes agents to travel trips, normalized by the distance
-    - use manhattan distance to normalize the average travel times for trips
-    - store the destinations of agents at the completion of each trip, such that the distance can be calculated after the simulation
-- experiments
-  - run a comparison of the shared exploration and random exploration agents, starting from a pretrained agent
+  - ~~calculate the average time it takes agents to travel trips, normalized by the distance~~
+    - ~~use manhattan distance to normalize the average travel times for trips~~
+    - ~~store the destinations of agents at the completion of each trip, such that the distance can be calculated after the simulation~~
+- ~~experiments~~
+  - ~~run a comparison of the shared exploration and random exploration agents, starting from a pretrained agent~~
 - Bug Fixes:
   - ~~fastest agents are now always the ones that reach their destination, because their travel time is set to 0: must keep track of trip travel time separately from total travel time~~
 - Create an inference only script to test the learned behaviour of agents, generate a video, plot some results and statistics
@@ -90,7 +90,7 @@ tasks
 - how can `learnability' be quantified, such that it can be measured how easy it is to learn in an environment? with many agents?
 - run large simulations over the weekend
   - ~~set variable path save location from batch file~~
-  - for shared exploration vs random exploration
+  - ~~for shared exploration vs random exploration~~
   - occasionally remove one (or more) trained agents and replace them with "dumb" agents
-  - test with and without IoT nodes sharing historical information
-    - for without, zero out the inputs to the NNs 
+  - ~~test with and without IoT nodes sharing historical information~~
+    - ~~for without, zero out the inputs to the NNs~~ 
