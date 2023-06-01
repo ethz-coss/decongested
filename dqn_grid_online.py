@@ -164,7 +164,7 @@ if __name__ == "__main__":
     parser.add_argument('next_destination_method', type=str)
     parser.add_argument('exploration_method', type=str)
     parser.add_argument('iot_nodes', type=bool)
-    parser.add_argument('save_path', type=bool)
+    parser.add_argument('save_path', type=str)
     args = parser.parse_args()
 
     N_ITER = args.n_iter
