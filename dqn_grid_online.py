@@ -48,6 +48,8 @@ def main(n_iter, next_destination_method="simple", exploration_method="random", 
     PATH = f"{save_path}/{ENVIRONMENT}/{AGENTS}_{TRAINING_SETTINGS}"
     Path(PATH).mkdir(parents=True, exist_ok=True)
 
+    print(PATH)
+
     LOAD_PRETRAINED_MODEL = True
     PRETRAINED_MODEL = f"pretrained_models/drivers_single_driver_random_N1_I200000_S16_B64_EXP0.5700000000000001_G0.9_LR0.01"
     if LOAD_PRETRAINED_MODEL:
@@ -145,6 +147,8 @@ def main(n_iter, next_destination_method="simple", exploration_method="random", 
 
     with open(f"{PATH}/trajectory", "wb") as file:
         pickle.dump(env.trajectory, file)
+
+    print(PATH)
 
 
 if __name__ == "__main__":
