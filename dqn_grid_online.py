@@ -39,7 +39,7 @@ def main(n_iter, next_destination_method="simple", exploration_method="random", 
     GAMMA = 0.9
     EPS_START = 0.5
     EPS_END = 0.05
-    EPS_DECAY = N_ITER / 1000  # larger is slower
+    EPS_DECAY = N_ITER / 10000  # larger is slower
     TAU = 0.05  # TAU is the update rate of the target network
     LR = 1e-2  # LR is the learning rate of the AdamW optimizer
     EXPLORATION_METHOD = exploration_method
