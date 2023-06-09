@@ -33,11 +33,11 @@ class ReplayMemory(object):
 
 class DQN(nn.Module):
 
-    def __init__(self, n_observations, n_actions):
+    def __init__(self, n_observations, n_actions, hidden1=32, hidden2=16):
         super(DQN, self).__init__()
-        self.layer1 = nn.Linear(n_observations, 32)
-        self.layer2 = nn.Linear(32, 16)
-        self.layer3 = nn.Linear(16, n_actions)
+        self.layer1 = nn.Linear(n_observations, hidden1)
+        self.layer2 = nn.Linear(hidden1, hidden2)
+        self.layer3 = nn.Linear(hidden2, n_actions)
 
     # Called with either one element to determine next action, or a batch
     # during optimization. Returns tensor([[left0exp,right0exp]...]).
@@ -50,9 +50,9 @@ class DQN(nn.Module):
 
 
 class model:
-    def __init__(self, n_observations, n_actions, device, LR, TAU, gamma, BATCH_SIZE=128, max_memory=1000):
-        self.policy_net = DQN(n_observations, n_actions).to(device)
-        self.target_net = DQN(n_observations, n_actions).to(device)
+    def __init__(self, n_observations, n_actions, device, LR, TAU, gamma, BATCH_SIZE=128, max_memory=1000, hidden1=32, hidden2=16):
+        self.policy_net = DQN(n_observations, n_actions, hidden1=hidden1, hidden2=hidden2).to(device)
+        self.target_net = DQN(n_observations, n_actions, hidden1=hidden1, hidden2=hidden2).to(device)
         self.target_net.load_state_dict(self.policy_net.state_dict())
         self.optimizer = optim.AdamW(self.policy_net.parameters(), lr=LR, amsgrad=True)
         self.memory = ReplayMemory(max_memory)
