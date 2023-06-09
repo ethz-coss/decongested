@@ -1,7 +1,7 @@
 import os
 
 SAVE_PATH = "/cluster/scratch/ccarissimo/decongested"
-N_ITER = 1
+N_ITER = 400000
 
 for GRID in ["uniform", "random", "braess"]:
     for NEXT_DESTINATION_METHOD in ["simple", "one-way", "random", "work-commute"]:
