@@ -223,8 +223,15 @@ class roadGridOnline:
             else:
                 self.destinations[agent] = np.array([0, 0])
 
+        elif method == "one-way":
+            self.destinations[agent] = np.array([self.size - 1, self.size - 1])
+            self.S[agent] = np.zeros(2)  # reset agent back to beginning
+
         elif method == "random":
-            self.destinations[agent] = np.random.randint(0, self.size, size=2)
+            destination = np.random.randint(0, self.size, size=2)
+            while (destination == self.S[agent]).all():
+                destination = np.random.randint(0, self.size, size=2)
+            self.destinations[agent] = destination
 
         elif method == "work-commute":
             next_destination = self.work_commute_destinations[int(agent)].pop()
