@@ -13,6 +13,7 @@ def generate_plots(trips, n_agents, PATH):
     max_step = 0
     for agent, trip in trips.items():
         trip_time = np.array([metrics[1] for metrics in trip]).flatten()  # extract the travel time
+        print([metrics[0] for metrics in trip])
         trip_step = np.array([metrics[0] for metrics in trip]).flatten().astype(int)  # extract the steps
         trip_freeflow_length = np.abs(
             np.diff(np.array([metrics[2] for metrics in trip[1:]]), axis=0).sum(axis=1).sum(axis=1))

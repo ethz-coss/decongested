@@ -200,7 +200,7 @@ class roadGridOnline:
 
         finished_indices = np.argwhere((self.reached_destinations * fastest_agents) == True)
         for n in finished_indices:
-            trip_length = self.step_counter[n]
+            trip_length = int(self.step_counter[n])
             trip_time = float(self.T[n])
             self.average_trip_time = ema_coefficient * self.average_trip_time + \
                                      (1 - ema_coefficient) * (trip_time - self.trips[int(n)][-1][1])

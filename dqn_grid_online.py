@@ -1,37 +1,28 @@
-import copy
-import math
-import random
-from collections import namedtuple, deque
-
 import torch
-import torch.nn as nn
-import torch.optim as optim
-import torch.nn.functional as F
-
-import matplotlib.pyplot as plt
-
 import pickle
 
 from dqn_agent import model, ReplayMemory
 
 from environment import roadGridOnline
-from networkx import grid_graph
-import networkx as nx
+
 import numpy as np
 from pathlib import Path
 import copy
 import plotting
+from grids import generator_functions
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 def main(n_iter, next_destination_method="simple", exploration_method="random", agents_see_iot_nodes=True,
-         save_path="experiments"):
+         save_path="experiments", grid_name="uniform"):
     SIZE = 4
-    G = grid_graph(dim=(SIZE, SIZE))
-    for e in G.edges():
-        G.edges[e]["cost"] = lambda x: 1 + x / 100
-    ENVIRONMENT = f"symmetric_grid_S{len(G.nodes())}"
+
+    G = generator_functions.generate_4x4_grids(costs=grid_name)
+
+    print([node for node in G.nodes()])
+
+    ENVIRONMENT = f"4x4_grid_{grid_name}"
     Path(f"{save_path}/{ENVIRONMENT}").mkdir(parents=True, exist_ok=True)
 
     N_AGENTS = 100
@@ -139,7 +130,7 @@ def main(n_iter, next_destination_method="simple", exploration_method="random", 
             "transitions": transitions,
         }
 
-    # plotting.generate_plots(env.trips, N_AGENTS, PATH)
+    plotting.generate_plots(env.trips, N_AGENTS, PATH)
 
     with open(f"{PATH}/data", "wb") as file:
         pickle.dump(data, file)
@@ -163,8 +154,9 @@ if __name__ == "__main__":
     parser.add_argument('n_iter', type=int)
     parser.add_argument('next_destination_method', type=str)
     parser.add_argument('exploration_method', type=str)
-    parser.add_argument('iot_nodes', type=bool)
+    parser.add_argument('--iot_nodes', action="store_true", default=False)
     parser.add_argument('save_path', type=str)
+    parser.add_argument('grid_name', type=str)
     args = parser.parse_args()
 
     N_ITER = args.n_iter
@@ -177,5 +169,6 @@ if __name__ == "__main__":
         next_destination_method=NEXT_DESTINATION_METHOD,
         exploration_method=EXPLORATION_METHOD,
         agents_see_iot_nodes=AGENTS_SEE_IOT_NODES,
-        save_path=args.save_path
+        save_path=args.save_path,
+        grid_name=args.grid_name
     )
