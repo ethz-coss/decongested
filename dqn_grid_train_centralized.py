@@ -62,10 +62,10 @@ def main(n_iter, next_destination_method="simple", exploration_method="random", 
         for pair in transitions:
             n, t = pair
             agent.memory.push(
-                t["state"],
-                t["action"],
-                t["next_state"],
-                t["reward"])
+                t["state"].to_device(DEVICE),
+                t["action"].to_device(DEVICE),
+                t["next_state"].to_device(DEVICE),
+                t["reward"].to_device(DEVICE))
 
     # train centralized agent
     training_iterations = 10000
