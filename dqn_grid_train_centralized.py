@@ -83,6 +83,9 @@ def main(n_iter, next_destination_method="simple", exploration_method="random", 
 
 if __name__ == "__main__":
     import argparse
+    import time
+
+    start_time = time.time()
 
     parser = argparse.ArgumentParser()
     parser.add_argument('n_iter', type=int)
@@ -106,3 +109,7 @@ if __name__ == "__main__":
         save_path=args.save_path,
         grid_name=args.grid_name
     )
+
+    end_time = time.time()
+
+    print("time taken:", end_time - start_time)
