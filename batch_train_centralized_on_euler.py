@@ -14,4 +14,4 @@ N_ITER = 400000
 #                 os.system(f'sbatch sbatch --mem-per-cpu=32G --gpus=1 --gres=gpumem:10g --time=48:00:00 --wrap="python dqn_train_centralized.py {N_ITER} {NEXT_DESTINATION_METHOD} {EXPLORATION_METHOD} {SAVE_PATH} {GRID} {"--iot_nodes" if IOT_NODES else ""}"')
 
 # test
-os.system(f'sbatch sbatch --mem-per-cpu=32G --gpus=1 --gres=gpumem:10g --time=48:00:00 --wrap="python dqn_train_centralized.py {N_ITER} simple random {SAVE_PATH} uniform --iot_nodes')
+os.system(f'sbatch sbatch --mem-per-cpu=32G --gpus=1 --gres=gpumem:10g --time=48:00:00 --wrap="python dqn_train_centralized.py {N_ITER} simple random {SAVE_PATH} uniform --iot_nodes"')
