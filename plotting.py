@@ -54,7 +54,7 @@ if __name__ == "__main__":
     import pickle
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('PATH', type=str)
+    parser.add_argument('n_iter', type=int)
     parser.add_argument('next_destination_method', type=str)
     parser.add_argument('exploration_method', type=str)
     parser.add_argument('--iot_nodes', action="store_true", default=False)
