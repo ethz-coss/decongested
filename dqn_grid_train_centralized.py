@@ -51,7 +51,7 @@ def main(n_iter, next_destination_method="simple", exploration_method="random", 
     print(PATH)
 
     # initialized centralized agent
-    with open(PATH + "data", "rb") as file:
+    with open(f"{PATH}/data", "rb") as file:
         data = pickle.load(file)
     agent = model(N_OBSERVATIONS, N_ACTIONS, DEVICE, LR=1e-4, TAU=0.005, gamma=0.9, BATCH_SIZE=1024, max_memory=10000000,
                   hidden1=4096, hidden2=2048)
@@ -83,6 +83,9 @@ def main(n_iter, next_destination_method="simple", exploration_method="random", 
 
 if __name__ == "__main__":
     import argparse
+    import time
+
+    start_time = time.time()
 
     parser = argparse.ArgumentParser()
     parser.add_argument('n_iter', type=int)
@@ -106,3 +109,7 @@ if __name__ == "__main__":
         save_path=args.save_path,
         grid_name=args.grid_name
     )
+
+    end_time = time.time()
+
+    print("time taken:", end_time - start_time)
