@@ -11,7 +11,7 @@ N_ITER = 400000
 #             continue
 #         for EXPLORATION_METHOD in ["random", "neighbours"]:
 #             for IOT_NODES in [True, False]:
-#                 os.system(f'sbatch --mem-per-cpu=32G --gpus=1 --gres=gpumem:10g --time=48:00:00 --wrap="python dqn_train_centralized.py {N_ITER} {NEXT_DESTINATION_METHOD} {EXPLORATION_METHOD} {SAVE_PATH} {GRID} {"--iot_nodes" if IOT_NODES else ""}"')
+#                 os.system(f'sbatch --mem-per-cpu=32G --gpus=1 --gres=gpumem:10g --time=48:00:00 --wrap="python dqn_grid_train_centralized.py {N_ITER} {NEXT_DESTINATION_METHOD} {EXPLORATION_METHOD} {SAVE_PATH} {GRID} {"--iot_nodes" if IOT_NODES else ""}"')
 
 # test
-os.system(f'sbatch --mem-per-cpu=32G --gpus=1 --gres=gpumem:10g --time=48:00:00 --wrap="python dqn_train_centralized.py {N_ITER} simple random {SAVE_PATH} uniform --iot_nodes"')
+os.system(f'sbatch --mem-per-cpu=32G --gpus=1 --gres=gpumem:10g --time=48:00:00 --wrap="python dqn_grid_train_centralized.py {N_ITER} simple random {SAVE_PATH} uniform --iot_nodes"')
