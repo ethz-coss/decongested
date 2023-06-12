@@ -90,11 +90,14 @@ if __name__ == "__main__":
     if os.path.exists(f"{PATH}/trips"):
         with open(f"{PATH}/trips", "rb") as file:
             trips = pickle.load(file)
+
+        generate_plots(
+            trips=trips,
+            n_agents=N_AGENTS,
+            PATH=PATH
+        )
+
+        print(f"successfully plotted {PATH}")
+
     else:
         print(f"path error: {PATH}/trips not found")
-
-    generate_plots(
-        trips=trips,
-        n_agents=N_AGENTS,
-        PATH=PATH
-    )
