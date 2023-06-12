@@ -1,10 +1,5 @@
 import matplotlib.pyplot as plt
-import matplotlib.animation
-import pickle
 import numpy as np
-import networkx as nx
-import seaborn as sns
-from IPython.display import HTML
 
 
 def generate_plots(trips, n_agents, PATH):
@@ -32,18 +27,74 @@ def generate_plots(trips, n_agents, PATH):
     plt.ylabel("trip length")
     plt.xlabel("step")
     plt.savefig(f"{PATH}/trip_lengths_timeseries.png")
+    plt.close()
 
     plt.plot(Y.mean(axis=0))
     plt.ylabel("average trip time/distance")
     plt.xlabel("step")
     plt.savefig(f"{PATH}/system_performance_timeseries.png")
+    plt.close()
 
     plt.hist([len(steps) for steps in travel_times.values()])
     plt.ylabel("frequency")
     plt.xlabel("completed trips")
     plt.savefig(f"{PATH}/completed_trips_histogram.png")
+    plt.close()
 
     plt.hist([steps[-1] for steps in travel_steps.values()])
     plt.ylabel("frequency")
     plt.xlabel("total steps")
     plt.savefig(f"{PATH}/trip_length_histogram.png")
+    plt.close()
+
+
+if __name__ == "__main__":
+    import argparse
+    import os
+    import pickle
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('PATH', type=str)
+    parser.add_argument('next_destination_method', type=str)
+    parser.add_argument('exploration_method', type=str)
+    parser.add_argument('--iot_nodes', action="store_true", default=False)
+    parser.add_argument('save_path', type=str)
+    parser.add_argument('grid_name', type=str)
+    args = parser.parse_args()
+
+    N_ITER = args.n_iter
+    NEXT_DESTINATION_METHOD = args.next_destination_method
+    EXPLORATION_METHOD = args.exploration_method
+    AGENTS_SEE_IOT_NODES = args.iot_nodes
+
+    ENVIRONMENT = f"4x4_grid_{args.grid_name}"
+
+    SIZE = 4
+    N_AGENTS = 100
+    N_ACTIONS = 4
+    N_STATES = 4
+    N_OBSERVATIONS = int(SIZE * 2) * 2 + 2 * N_ACTIONS + 1  # state space
+    EPISODE_TIMEOUT = 16
+
+    BATCH_SIZE = 64
+    GAMMA = 0.9
+    EPS_START = 0.5
+    EPS_END = 0.05
+    EPS_DECAY = N_ITER / 10000  # larger is slower
+    TAU = 0.05  # TAU is the update rate of the target network
+    LR = 1e-2  # LR is the learning rate of the AdamW optimizer
+    AGENTS = f"dqn_{N_OBSERVATIONS}_exploration_{EXPLORATION_METHOD}_iot_{AGENTS_SEE_IOT_NODES}"
+    TRAINING_SETTINGS = f"N{N_AGENTS}_dex-{NEXT_DESTINATION_METHOD}_I{N_ITER}_B{BATCH_SIZE}_EXP{EPS_START - EPS_END}_G{GAMMA}_LR{LR}"
+    PATH = f"{args.save_path}/{ENVIRONMENT}/{AGENTS}_{TRAINING_SETTINGS}"
+
+    if os.path.exists(f"{PATH}/trips"):
+        with open(f"{PATH}/trips", "rb") as file:
+            trips = pickle.load(file)
+    else:
+        print(f"path error: {PATH}/trips not found")
+
+    generate_plots(
+        trips=trips,
+        n_agents=N_AGENTS,
+        PATH=PATH
+    )
