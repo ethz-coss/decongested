@@ -117,15 +117,15 @@ class model:
 
         next_state_batch = [s for s in batch.next_state if s is not None]
         if len(next_state_batch) > 0:
-            non_final_next_states = torch.stack(next_state_batch)
+            non_final_next_states = torch.stack(next_state_batch).to(self.device)
         else:
             non_final_next_states = None
 
         #     print("batch.next_state", batch.next_state)
         #     print("nfns,", non_final_next_states)
-        state_batch = torch.cat(batch.state)
-        action_batch = torch.cat(batch.action)
-        reward_batch = torch.cat(batch.reward)
+        state_batch = torch.cat(batch.state).to(self.device)
+        action_batch = torch.cat(batch.action).to(self.device)
+        reward_batch = torch.cat(batch.reward).to(self.device)
 
         # print(state_batch, action_batch)
         # Compute Q(s_t, a) - the model computes Q(s_t), then we select the
