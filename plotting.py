@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def generate_plots(trips, n_agents, PATH):
+def extract_normalized_trip_lengths_per_agent(trips, n_agents):
     travel_times = {}
     travel_steps = {}
     max_step = 0
@@ -22,16 +22,17 @@ def generate_plots(trips, n_agents, PATH):
     for agent, times in travel_times.items():
         y = np.interp(x, travel_steps[agent], times)
         Y[agent, :] = y
-        plt.plot(x, y)
+
+    return Y
+
+
+def generate_plots(trips, n_agents, PATH):
+
+    Y = extract_normalized_trip_lengths_per_agent(trips, n_agents)
 
     internal_save_path = "/cluster/home/ccarissimo/decongested/cluster_plots"
     run_name = PATH.split("/")[-1]
     environment = PATH.split("/")[-2]
-
-    plt.ylabel("trip length")
-    plt.xlabel("step")
-    plt.savefig(f"{internal_save_path}/trip_lengths_timeseries_{environment}_{run_name}.png")
-    plt.close()
 
     plt.plot(Y.mean(axis=0))
     plt.ylabel("average trip time/distance")

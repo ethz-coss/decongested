@@ -14,17 +14,8 @@ from grids import generator_functions
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-def compose_path(save_path, grid_name, n_observations, exploration_method, agents_see_iot_nodes,
-                 n_agents, next_destination_method, n_iter, batch_size, eps_start, eps_end, gamma, lr):
-    ENVIRONMENT = f"4x4_grid_{grid_name}"
-    AGENTS = f"dqn_{n_observations}_exploration_{exploration_method}_iot_{agents_see_iot_nodes}"
-    TRAINING_SETTINGS = f"N{n_agents}_dex-{next_destination_method}_I{n_iter}_B{batch_size}_EXP{eps_start - eps_end}_G{gamma}_LR{lr}"
-    PATH = f"{save_path}/{ENVIRONMENT}/{AGENTS}_{TRAINING_SETTINGS}"
-    return PATH
-
-
 def main(n_iter, next_destination_method="simple", exploration_method="random", agents_see_iot_nodes=True,
-         save_path="experiments", grid_name="uniform", train=True):
+         save_path="experiments", grid_name="uniform", train=False, centralized_ratio=0):
     SIZE = 4
 
     G = generator_functions.generate_4x4_grids(costs=grid_name)
@@ -59,23 +50,17 @@ def main(n_iter, next_destination_method="simple", exploration_method="random", 
 
     print(PATH)
 
-    LOAD_PRETRAINED_MODEL = True
-    PRETRAINED_MODEL = f"pretrained_models/drivers_single_driver_random_N1_I200000_S16_B64_EXP0.5700000000000001_G0.9_LR0.01"
-    if LOAD_PRETRAINED_MODEL:
-        with open(PRETRAINED_MODEL, "rb") as file:
-            drivers = pickle.load(file)
-        for driver in drivers.values():
-            driver.steps_done = 0
-            driver.memory = ReplayMemory(10000)
-        driver = drivers[0]
-        for n in range(N_AGENTS):
-            drivers[n] = copy.deepcopy(driver)
-    else:
-        drivers = {}
-        for n in range(N_AGENTS):
-            drivers[n] = model(
-                N_OBSERVATIONS, N_ACTIONS, DEVICE, LR, TAU, GAMMA, BATCH_SIZE=BATCH_SIZE, max_memory=10000
-            )
+    PRETRAINED_MODEL = f"{PATH}/drivers"
+    with open(PRETRAINED_MODEL, "rb") as file:
+        drivers = pickle.load(file)
+    for driver in drivers.values():
+        driver.steps_done = 0
+        driver.memory = ReplayMemory(10000)
+
+    if centralized_ratio > 0:
+        with open(f"{PATH}/agent", "wb") as file:
+            agent = pickle.load(file)
+    centralized_mask = np.random.binomial(n=1, p=centralized_ratio, size=N_AGENTS).astype(bool)
 
     data = {}
 
@@ -90,32 +75,28 @@ def main(n_iter, next_destination_method="simple", exploration_method="random", 
 
     state, info, base_state, agents_at_base_state = env.reset()
     for t in range(N_ITER):
-        if EXPLORATION_METHOD == "neighbours":
-            neighbour_beliefs = {
-                tuple(state[i]): [
-                    driver.judge_state(
-                        state=torch.tensor(state[n], dtype=torch.float32, device=DEVICE))
-                    for n, driver in enumerate(drivers.values()) if agents_at_base_state[n]]
-                for i in range(N_AGENTS) if agents_at_base_state[i]
-            }
-
-            for state_tuple, beliefs in neighbour_beliefs.items():
-                beliefs = torch.stack(beliefs)
-                beliefs = beliefs.cpu().numpy()
-                beliefs = np.mean(beliefs, axis=0)
-                neighbour_beliefs[state_tuple] = beliefs
-        else:
-            neighbour_beliefs = None
 
         action_list = [
             driver.select_action(
                 state=torch.tensor(state[n], dtype=torch.float32, device=DEVICE),
-                EPS_END=EPS_END,
-                EPS_START=EPS_START,
-                EPS_DECAY=EPS_DECAY,
+                EPS_END=0,
+                EPS_START=0,
+                EPS_DECAY=1,
                 method=EXPLORATION_METHOD,
-                neighbour_beliefs=neighbour_beliefs).unsqueeze(0)
+                neighbour_beliefs=None).unsqueeze(0)
             for n, driver in enumerate(drivers.values()) if agents_at_base_state[n]]
+
+        agents_that_receive_centralized_recommendation = np.argwhere(agents_at_base_state * centralized_mask)
+
+        for n in agents_that_receive_centralized_recommendation:
+            action_list[n] = agent.select_action(
+                state=torch.tensor(state[n], dtype=torch.float32, device=DEVICE),
+                EPS_END=0,
+                EPS_START=0,
+                EPS_DECAY=1,
+                method="random",
+                neighbour_beliefs=None).unsqueeze(0)
+
         A = torch.cat(action_list)
         actions = A.cpu().numpy()
 
@@ -144,18 +125,18 @@ def main(n_iter, next_destination_method="simple", exploration_method="random", 
 
     plotting.generate_plots(env.trips, N_AGENTS, PATH)
 
-    with open(f"{PATH}/data", "wb") as file:
+    with open(f"{PATH}/data_evaluate", "wb") as file:
         pickle.dump(data, file)
 
-    for driver in drivers.values():
-        driver.memory = ReplayMemory(10000)  # clear buffer for storage
-    with open(f"{PATH}/drivers", "wb") as file:
-        pickle.dump(drivers, file)
+    # for driver in drivers.values():
+    #     driver.memory = ReplayMemory(10000)  # clear buffer for storage
+    # with open(f"{PATH}/drivers", "wb") as file:
+    #     pickle.dump(drivers, file)
 
-    with open(f"{PATH}/trips", "wb") as file:
+    with open(f"{PATH}/trips_evaluate", "wb") as file:
         pickle.dump(dict(env.trips), file)  # calling `dict' to offset defaultdict lambda for pickling
 
-    with open(f"{PATH}/trajectory", "wb") as file:
+    with open(f"{PATH}/trajectory_evaluate", "wb") as file:
         pickle.dump(env.trajectory, file)
 
     print(PATH)
@@ -185,5 +166,6 @@ if __name__ == "__main__":
         exploration_method=EXPLORATION_METHOD,
         agents_see_iot_nodes=AGENTS_SEE_IOT_NODES,
         save_path=args.save_path,
-        grid_name=args.grid_name
+        grid_name=args.grid_name,
+        train=args.train
     )
