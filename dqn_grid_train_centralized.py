@@ -66,13 +66,13 @@ def main(n_iter, next_destination_method="simple", exploration_method="random", 
                 t["action"].to(DEVICE),
                 t["next_state"].to(DEVICE),
                 t["reward"].to(DEVICE))
+    
+    del data
 
     # train centralized agent
     training_iterations = 10000
     for step in range(training_iterations):
         agent.optimize_model()
-
-    del data  # remove data from memory
 
     agent.memory = ReplayMemory(10000)  # clear buffer for storage
     with open(f"{PATH}/agent", "wb") as file:
