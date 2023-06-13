@@ -94,3 +94,5 @@ tasks
   - occasionally remove one (or more) trained agents and replace them with "dumb" agents
   - ~~test with and without IoT nodes sharing historical information~~
     - ~~for without, zero out the inputs to the NNs~~ 
+- Create Large NN model to control all drivers, one-by-one
+
