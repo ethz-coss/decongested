@@ -37,19 +37,19 @@ def generate_plots(trips, n_agents, PATH, extension=""):
     plt.plot(Y.mean(axis=0))
     plt.ylabel("average trip time/distance")
     plt.xlabel("step")
-    plt.savefig(f"{internal_save_path}/system_performance_timeseries_{environment}_{run_name}_{extension}.png")
+    plt.savefig(f"{internal_save_path}/system_performance_timeseries_{environment}_{run_name}{extension}.png")
     plt.close()
 
     plt.hist([len(steps) for steps in travel_times.values()])
     plt.ylabel("frequency")
     plt.xlabel("completed trips")
-    plt.savefig(f"{internal_save_path}/completed_trips_histogram_{environment}_{run_name}_{extension}.png")
+    plt.savefig(f"{internal_save_path}/completed_trips_histogram_{environment}_{run_name}{extension}.png")
     plt.close()
 
     plt.hist([steps[-1] for steps in travel_steps.values()])
     plt.ylabel("frequency")
     plt.xlabel("total steps")
-    plt.savefig(f"{internal_save_path}/trip_length_histogram_{environment}_{run_name}_{extension}.png")
+    plt.savefig(f"{internal_save_path}/trip_length_histogram_{environment}_{run_name}{extension}.png")
     plt.close()
 
 

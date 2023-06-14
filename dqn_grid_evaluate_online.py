@@ -130,7 +130,7 @@ def main(n_iter, next_destination_method="simple", exploration_method="random", 
             "transitions": transitions,
         }
 
-    plotting.generate_plots(env.trips, N_AGENTS, PATH)
+    plotting.generate_plots(env.trips, N_AGENTS, PATH, extension=f"_ratio_{centralized_ratio}")
 
     with open(f"{PATH}/data_evaluate_ratio({centralized_ratio})", "wb") as file:
         pickle.dump(data, file)
