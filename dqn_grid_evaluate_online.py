@@ -60,7 +60,7 @@ def main(n_iter, next_destination_method="simple", exploration_method="random", 
         driver.memory = ReplayMemory(10000)
 
     if centralized_ratio > 0:
-        with open(f"{PATH}/agent", "wb") as file:
+        with open(f"{PATH}/agent", "rb") as file:
             agent = pickle.load(file)
     centralized_mask = np.random.binomial(n=1, p=centralized_ratio, size=N_AGENTS).astype(bool)
 
