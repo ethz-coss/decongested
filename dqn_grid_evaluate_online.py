@@ -134,7 +134,7 @@ def main(n_iter, next_destination_method="simple", exploration_method="random", 
 
     plotting.generate_plots(env.trips, N_AGENTS, PATH, extension=f"_ratio_{centralized_ratio}")
 
-    with open(f"{PATH}/data_evaluate_ratio({centralized_ratio})", "wb") as file:
+    with open(f"{PATH}/data_evaluate_ratio_{centralized_ratio}", "wb") as file:
         pickle.dump(data, file)
 
     # for driver in drivers.values():
@@ -142,10 +142,10 @@ def main(n_iter, next_destination_method="simple", exploration_method="random", 
     # with open(f"{PATH}/drivers", "wb") as file:
     #     pickle.dump(drivers, file)
 
-    with open(f"{PATH}/trips_evaluate_ratio({centralized_ratio})", "wb") as file:
+    with open(f"{PATH}/trips_evaluate_ratio_{centralized_ratio}", "wb") as file:
         pickle.dump(dict(env.trips), file)  # calling `dict' to offset defaultdict lambda for pickling
 
-    with open(f"{PATH}/trajectory_evaluate_ratio({centralized_ratio})", "wb") as file:
+    with open(f"{PATH}/trajectory_evaluate_ratio_{centralized_ratio}", "wb") as file:
         pickle.dump(env.trajectory, file)
 
     print(PATH)
