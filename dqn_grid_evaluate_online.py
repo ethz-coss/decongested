@@ -11,6 +11,8 @@ import copy
 import plotting
 from grids import generator_functions
 
+from dqn_grid_online import compose_path
+
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
@@ -62,6 +64,9 @@ def main(n_iter, next_destination_method="simple", exploration_method="random", 
             agent = pickle.load(file)
     centralized_mask = np.random.binomial(n=1, p=centralized_ratio, size=N_AGENTS).astype(bool)
 
+    PATH = f"{PATH}/evaluations"
+    Path(PATH).mkdir(parents=True, exist_ok=True)
+
     data = {}
 
     env = roadGridOnline(
@@ -88,14 +93,15 @@ def main(n_iter, next_destination_method="simple", exploration_method="random", 
 
         agents_that_receive_centralized_recommendation = np.argwhere(agents_at_base_state * centralized_mask)
 
-        for n in agents_that_receive_centralized_recommendation:
-            action_list[n] = agent.select_action(
-                state=torch.tensor(state[n], dtype=torch.float32, device=DEVICE),
-                EPS_END=0,
-                EPS_START=0,
-                EPS_DECAY=1,
-                method="random",
-                neighbour_beliefs=None).unsqueeze(0)
+        if centralized_ratio > 0:
+            for n in agents_that_receive_centralized_recommendation:
+                action_list[n] = agent.select_action(
+                    state=torch.tensor(state[n], dtype=torch.float32, device=DEVICE),
+                    EPS_END=0,
+                    EPS_START=0,
+                    EPS_DECAY=1,
+                    method="random",
+                    neighbour_beliefs=None).unsqueeze(0)
 
         A = torch.cat(action_list)
         actions = A.cpu().numpy()
@@ -125,7 +131,7 @@ def main(n_iter, next_destination_method="simple", exploration_method="random", 
 
     plotting.generate_plots(env.trips, N_AGENTS, PATH)
 
-    with open(f"{PATH}/data_evaluate", "wb") as file:
+    with open(f"{PATH}/data_evaluate_ratio({centralized_ratio})", "wb") as file:
         pickle.dump(data, file)
 
     # for driver in drivers.values():
@@ -133,10 +139,10 @@ def main(n_iter, next_destination_method="simple", exploration_method="random", 
     # with open(f"{PATH}/drivers", "wb") as file:
     #     pickle.dump(drivers, file)
 
-    with open(f"{PATH}/trips_evaluate", "wb") as file:
+    with open(f"{PATH}/trips_evaluate_ratio({centralized_ratio})", "wb") as file:
         pickle.dump(dict(env.trips), file)  # calling `dict' to offset defaultdict lambda for pickling
 
-    with open(f"{PATH}/trajectory_evaluate", "wb") as file:
+    with open(f"{PATH}/trajectory_evaluate_ratio({centralized_ratio})", "wb") as file:
         pickle.dump(env.trajectory, file)
 
     print(PATH)
