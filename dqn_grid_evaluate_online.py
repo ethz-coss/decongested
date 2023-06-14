@@ -98,7 +98,7 @@ def main(n_iter, next_destination_method="simple", exploration_method="random", 
 
         if centralized_ratio > 0:
             for n in agents_that_receive_centralized_recommendation:
-                action_list[n] = agent.select_action(
+                action_list[int(n)] = agent.select_action(
                     state=torch.tensor(state[int(n)], dtype=torch.float32, device=DEVICE),
                     EPS_END=0,
                     EPS_START=0,
