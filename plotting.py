@@ -23,12 +23,12 @@ def extract_normalized_trip_lengths_per_agent(trips, n_agents):
         y = np.interp(x, travel_steps[agent], times)
         Y[agent, :] = y
 
-    return Y
+    return Y, travel_times, travel_steps
 
 
-def generate_plots(trips, n_agents, PATH):
+def generate_plots(trips, n_agents, PATH, extension=""):
 
-    Y = extract_normalized_trip_lengths_per_agent(trips, n_agents)
+    Y, travel_times, travel_steps = extract_normalized_trip_lengths_per_agent(trips, n_agents)
 
     internal_save_path = "/cluster/home/ccarissimo/decongested/cluster_plots"
     run_name = PATH.split("/")[-1]
@@ -37,19 +37,19 @@ def generate_plots(trips, n_agents, PATH):
     plt.plot(Y.mean(axis=0))
     plt.ylabel("average trip time/distance")
     plt.xlabel("step")
-    plt.savefig(f"{internal_save_path}/system_performance_timeseries_{environment}_{run_name}.png")
+    plt.savefig(f"{internal_save_path}/system_performance_timeseries_{environment}_{run_name}_{extension}.png")
     plt.close()
 
     plt.hist([len(steps) for steps in travel_times.values()])
     plt.ylabel("frequency")
     plt.xlabel("completed trips")
-    plt.savefig(f"{internal_save_path}/completed_trips_histogram_{environment}_{run_name}.png")
+    plt.savefig(f"{internal_save_path}/completed_trips_histogram_{environment}_{run_name}_{extension}.png")
     plt.close()
 
     plt.hist([steps[-1] for steps in travel_steps.values()])
     plt.ylabel("frequency")
     plt.xlabel("total steps")
-    plt.savefig(f"{internal_save_path}/trip_length_histogram_{environment}_{run_name}.png")
+    plt.savefig(f"{internal_save_path}/trip_length_histogram_{environment}_{run_name}_{extension}.png")
     plt.close()
 
 

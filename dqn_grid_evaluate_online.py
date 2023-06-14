@@ -78,8 +78,9 @@ def main(n_iter, next_destination_method="simple", exploration_method="random", 
         agents_see_iot_nodes=AGENTS_SEE_IOT_NODES
     )
 
+    EVALUATE_ITER = 20000
     state, info, base_state, agents_at_base_state = env.reset()
-    for t in range(N_ITER):
+    for t in range(EVALUATE_ITER):
 
         action_list = [
             driver.select_action(
@@ -159,6 +160,7 @@ if __name__ == "__main__":
     parser.add_argument('save_path', type=str)
     parser.add_argument('grid_name', type=str)
     parser.add_argument('--train', action="store_true", default=False)
+    parser.add_argument('centralized_ratio', type=float)
     args = parser.parse_args()
 
     N_ITER = args.n_iter
@@ -173,5 +175,6 @@ if __name__ == "__main__":
         agents_see_iot_nodes=AGENTS_SEE_IOT_NODES,
         save_path=args.save_path,
         grid_name=args.grid_name,
-        train=args.train
+        train=args.train,
+        centralized_ratio=args.centralized_ratio
     )
