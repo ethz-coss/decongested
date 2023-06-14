@@ -58,6 +58,8 @@ def main(n_iter, next_destination_method="simple", exploration_method="random", 
     for driver in drivers.values():
         driver.steps_done = 0
         driver.memory = ReplayMemory(10000)
+        driver.policy_net.to(DEVICE)
+        driver.target_net.to(DEVICE)
 
     if centralized_ratio > 0:
         with open(f"{PATH}/agent", "rb") as file:
