@@ -12,4 +12,4 @@ N_ITER = 400000
 #                 os.system(f'sbatch --mem-per-cpu=64G --time=48:00:00 --wrap="python dqn_grid_evaluate_online.py {N_ITER} {NEXT_DESTINATION_METHOD} {EXPLORATION_METHOD} {SAVE_PATH} {GRID} {"--iot_nodes" if IOT_NODES else ""}"')
 
 # test
-os.system(f'sbatch --mem-per-cpu=16G --time=04:00:00 --wrap="python dqn_grid_evaluate_online.py {N_ITER} simple random {SAVE_PATH} uniform 0.5 --iot_nodes"')
+os.system(f'sbatch --mem-per-cpu=16G --time=04:00:00 --wrap="python dqn_grid_evaluate_online.py {N_ITER} random random {SAVE_PATH} uniform 0.5 --iot_nodes"')
