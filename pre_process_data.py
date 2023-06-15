@@ -7,6 +7,11 @@ def extract_transitions_from_data(data):
     return transitions
 
 
+def extract_moving_average_from_data(data):
+    moving_average = [data[t]["average_trip_time"] for t in data.keys()]
+    return moving_average
+
+
 def count_state_action_visits(transitions, size, n_actions, n_agents):
     """
     :param transitions: list of lists, of tuples (n "agent_index", Transition "named tuple")
@@ -119,6 +124,7 @@ if __name__ == "__main__":
     system_interpolated_trip_lengths = per_agent_interpolated_trip_lengths.mean(0)
     average_trip_length_during_training = system_interpolated_trip_lengths.mean()
     average_trip_length_end_of_training = system_interpolated_trip_lengths[-1000:-1].mean()
+    variance_trip_length_end_of_training = system_interpolated_trip_lengths[-1000:-1].var()
 
     del trips
 
@@ -131,6 +137,10 @@ if __name__ == "__main__":
     empirical_entropy = calculate_driver_entropy(state_action_visits)
     average_empirical_entropy_training = np.mean(np.array([driver_entropy for driver_entropy in empirical_entropy.values()]))
 
+    moving_average = extract_moving_average_from_data(data)
+    moving_average_all_training = np.array(moving_average).mean()
+    moving_average_final_training = np.array(moving_average[-1000:-1]).mean()
+
     del data
 
     evaluations_path = f"{path}/evaluations"
@@ -141,9 +151,11 @@ if __name__ == "__main__":
     per_agent_interpolated_trip_lengths, _, _ = extract_normalized_trip_lengths_per_agent(trips, n_agents=100)
     system_interpolated_trip_lengths = per_agent_interpolated_trip_lengths.mean(0)
     average_trip_length_during_testing = system_interpolated_trip_lengths.mean()
+    variance_trip_length_during_testing = system_interpolated_trip_lengths.var()
 
     del trips
 
+    # evaluate data
     with open(f"{evaluations_path}/data_evaluate_ratio_{args.centralized_ratio}", "rb") as file:
         data = pickle.load(file)
 
@@ -152,6 +164,9 @@ if __name__ == "__main__":
     empirical_entropy = calculate_driver_entropy(state_action_visits)
     average_empirical_entropy_testing = np.mean(
         np.array([driver_entropy for driver_entropy in empirical_entropy.values()]))
+
+    moving_average = extract_moving_average_from_data(data)
+    moving_average_all_testing = np.array(moving_average).mean()
 
     del data
 
@@ -164,7 +179,12 @@ if __name__ == "__main__":
         "ratio": args.centralized_ratio,
         "online_all": average_trip_length_during_training,
         "online_end": average_trip_length_end_of_training,
+        "online_var": variance_trip_length_end_of_training,
         "evaluate": average_trip_length_during_testing,
+        "evaluate_var": variance_trip_length_during_testing,
+        "ma_all_training": moving_average_all_training,
+        "ma_final_training": moving_average_final_training,
+        "ma_all_testing": moving_average_all_testing,
         "entropy_training": average_empirical_entropy_training,
         "entropy_testing": average_empirical_entropy_testing,
     }
