@@ -10,4 +10,7 @@ for GRID in ["uniform", "random"]:
         for EXPLORATION_METHOD in ["random", "neighbours"]:
             for IOT_NODES in [True, False]:
                 for CENTRALIZED_RATIO in [0, 0.05, 0.5, 1]:
-                    os.system(f'sbatch --mem-per-cpu=32G --time=48:00:00 --wrap="python pre_process_data.py {N_ITER} {NEXT_DESTINATION_METHOD} {EXPLORATION_METHOD} {SAVE_PATH} {GRID} {INTERNAL_SAVE_PATH} {"--iot_nodes" if IOT_NODES else ""}"')
+                    os.system(f'sbatch --mem-per-cpu=32G --time=48:00:00 --wrap="python pre_process_data.py {N_ITER} {NEXT_DESTINATION_METHOD} {EXPLORATION_METHOD} {SAVE_PATH} {GRID} {CENTRALIZED_RATIO} {INTERNAL_SAVE_PATH}  {"--iot_nodes" if IOT_NODES else ""}"')
+
+# test
+# os.system(f'sbatch --mem-per-cpu=32G --time=48:00:00 --wrap="python pre_process_data.py 400000 simple random /cluster/scratch/ccarissimo/decongested uniform 0 /cluster/home/ccarissimo/decongested/test_process --iot_nodes"')
