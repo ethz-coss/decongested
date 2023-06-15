@@ -135,7 +135,7 @@ if __name__ == "__main__":
 
     evaluations_path = f"{path}/evaluations"
     # evaluate trips
-    with open(f"{path}/trips", "rb") as file:
+    with open(f"{evaluations_path}/trips", "rb") as file:
         trips = pickle.load(file)
 
     per_agent_interpolated_trip_lengths, _, _ = extract_normalized_trip_lengths_per_agent(trips, n_agents=100)
