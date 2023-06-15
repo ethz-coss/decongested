@@ -53,7 +53,8 @@ def train_centralized_agent_off_policy(n_iter, next_destination_method="simple",
     # initialized centralized agent
     with open(f"{PATH}/data", "rb") as file:
         data = pickle.load(file)
-    agent = model(N_OBSERVATIONS, N_ACTIONS, DEVICE, LR=1e-4, TAU=0.005, gamma=0.9, BATCH_SIZE=1024, max_memory=10000000,
+    agent_observations = N_OBSERVATIONS if not use_agent_ids else (N_OBSERVATIONS + 1)
+    agent = model(agent_observations, N_ACTIONS, DEVICE, LR=1e-4, TAU=0.005, gamma=0.9, BATCH_SIZE=1024, max_memory=10000000,
                   hidden1=4096, hidden2=2048)
 
     possible_ids = np.linspace(0, 0.99, N_AGENTS)
@@ -115,7 +116,8 @@ if __name__ == "__main__":
         exploration_method=EXPLORATION_METHOD,
         agents_see_iot_nodes=AGENTS_SEE_IOT_NODES,
         save_path=args.save_path,
-        grid_name=args.grid_name
+        grid_name=args.grid_name,
+        use_agent_ids=args.with_agent_ids
     )
 
     end_time = time.time()
