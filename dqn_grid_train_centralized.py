@@ -82,7 +82,7 @@ def train_centralized_agent_off_policy(n_iter, next_destination_method="simple",
         agent.optimize_model()
 
     agent.memory = ReplayMemory(10000)  # clear buffer for storage
-    with open(f"{PATH}/agent", "wb") as file:
+    with open(f"{PATH}/agent{'_with_ids' if use_agent_ids else ''}", "wb") as file:
         pickle.dump(agent, file)
 
     print(PATH)
@@ -98,9 +98,10 @@ if __name__ == "__main__":
     parser.add_argument('n_iter', type=int)
     parser.add_argument('next_destination_method', type=str)
     parser.add_argument('exploration_method', type=str)
-    parser.add_argument('--iot_nodes', action="store_true", default=False)
     parser.add_argument('save_path', type=str)
     parser.add_argument('grid_name', type=str)
+    parser.add_argument('--iot_nodes', action="store_true", default=False)
+    parser.add_argument('--with_agent_ids', action="store_true", default=False)
     args = parser.parse_args()
 
     N_ITER = args.n_iter
