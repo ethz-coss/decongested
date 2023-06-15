@@ -7,7 +7,7 @@ def unify_pickle_rows_into_dataframe(path):
 
     rows = []
 
-    for file_path in glob.glob(pathname=path):
+    for file_path in glob.glob(pathname=f"{path}/*"):
         with open(file_path, "rb") as file:
             row = pickle.load(file)
 
