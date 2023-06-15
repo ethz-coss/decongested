@@ -171,5 +171,5 @@ if __name__ == "__main__":
 
     Path(args.internal_save_path).mkdir(parents=True, exist_ok=True)
     with open(f"{args.internal_save_path}/row_{args.grid_name}_{args.next_destination_method}_{args.exploration_method}"
-              f"_{args.iot_nodes}_{args.centralized_ratio}", "rb") as file:
+              f"_{args.iot_nodes}_{args.centralized_ratio}", "wb") as file:
         pickle.dump(row, file)
