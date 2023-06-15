@@ -14,8 +14,8 @@ from grids import generator_functions
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-def main(n_iter, next_destination_method="simple", exploration_method="random", agents_see_iot_nodes=True,
-         save_path="experiments", grid_name="uniform", use_agent_ids=False):
+def train_centralized_agent_off_policy(n_iter, next_destination_method="simple", exploration_method="random", agents_see_iot_nodes=True,
+                                       save_path="experiments", grid_name="uniform", use_agent_ids=False):
     SIZE = 4
 
     G = generator_functions.generate_4x4_grids(costs=grid_name)
@@ -108,7 +108,7 @@ if __name__ == "__main__":
     EXPLORATION_METHOD = args.exploration_method
     AGENTS_SEE_IOT_NODES = args.iot_nodes
 
-    main(
+    train_centralized_agent_off_policy(
         n_iter=N_ITER,
         next_destination_method=NEXT_DESTINATION_METHOD,
         exploration_method=EXPLORATION_METHOD,
