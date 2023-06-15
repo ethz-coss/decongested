@@ -15,7 +15,7 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 def main(n_iter, next_destination_method="simple", exploration_method="random", agents_see_iot_nodes=True,
-         save_path="experiments", grid_name="uniform"):
+         save_path="experiments", grid_name="uniform", use_agent_ids=False):
     SIZE = 4
 
     G = generator_functions.generate_4x4_grids(costs=grid_name)
@@ -56,11 +56,18 @@ def main(n_iter, next_destination_method="simple", exploration_method="random", 
     agent = model(N_OBSERVATIONS, N_ACTIONS, DEVICE, LR=1e-4, TAU=0.005, gamma=0.9, BATCH_SIZE=1024, max_memory=10000000,
                   hidden1=4096, hidden2=2048)
 
+    possible_ids = np.linspace(0, 0.99, N_AGENTS)
+
     # push data to agent memory buffer
     for d in data.values():
         transitions = d["transitions"]
         for pair in transitions:
             n, t = pair
+
+            if use_agent_ids:
+                id = np.random.choice(possible_ids)
+                t["state"] = torch.cat((torch.tensor([[id]]), t["state"]), 1)
+                t["next_state"] = torch.cat((torch.tensor([[id]]), t["state"]), 1)
             agent.memory.push(
                 t["state"].to(DEVICE),
                 t["action"].to(DEVICE),
