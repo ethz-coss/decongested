@@ -3,7 +3,7 @@ import os
 os.system("module load gcc/8.2.0 python/3.9.9")  # load appropriate modules for EULER cluster
 
 SAVE_PATH = "/cluster/scratch/ccarissimo/decongested"
-N_ITER = 400000
+N_ITER = 100
 AGENT_IDS = True
 
 # for GRID in ["uniform", "random", "braess"]:
