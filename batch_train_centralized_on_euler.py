@@ -15,4 +15,4 @@ AGENT_IDS = True
 #                 os.system(f'sbatch --mem-per-cpu=64G --gpus=1 --gres=gpumem:32g --time=48:00:00 --wrap="python dqn_grid_train_centralized.py {N_ITER} {NEXT_DESTINATION_METHOD} {EXPLORATION_METHOD} {SAVE_PATH} {GRID} {"--iot_nodes" if IOT_NODES else ""} {"--with_agent_ids" if AGENT_IDS else ""}"')
 
 # test
-os.system(f'sbatch --mem-per-cpu=64G --gpus=1 --gres=gpumem:32g --time=48:00:00 --wrap="python dqn_grid_train_centralized.py {N_ITER} simple random {SAVE_PATH} uniform --iot_nodes --with_agent_ids"')
+os.system(f'sbatch --mem-per-cpu=64G --gpus=1 --gres=gpumem:32g --time=48:00:00 --wrap="python dqn_grid_train_centralized.py 1000 simple random {SAVE_PATH} uniform --iot_nodes --with_agent_ids"')
