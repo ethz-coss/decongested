@@ -69,7 +69,7 @@ def train_centralized_agent_off_policy(n_iter, next_destination_method="simple",
                 id = np.random.choice(possible_ids)
                 id_tensor = torch.tensor([[id]], dtype=torch.float32)
                 t["state"] = torch.cat((id_tensor, t["state"]), 1)
-                t["next_state"] = torch.cat((id_tensor, t["state"]), 1)
+                t["next_state"] = torch.cat((id_tensor, t["next_state"]), 1)
             agent.memory.push(
                 t["state"].to(DEVICE),
                 t["action"].to(DEVICE),
