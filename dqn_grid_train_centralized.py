@@ -14,6 +14,20 @@ from grids import generator_functions
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
+def add_randomized_ids_to_transitions(transition, possible_ids):
+    id = np.random.choice(possible_ids)
+    id_tensor = torch.tensor([[id]], dtype=torch.float32)
+    id_tensor_2 = torch.tensor([id], dtype=torch.float32)
+    transition["state"] = torch.cat((id_tensor, transition["state"]), 1)
+    transition["next_state"] = torch.cat((id_tensor_2, transition["next_state"]), 0)
+    return transition
+
+
+def add_randomized_id_to_state(state, possible_ids):
+    id = np.random.choice(possible_ids)
+    return np.concatenate([[id], state])
+
+
 def train_centralized_agent_off_policy(n_iter, next_destination_method="simple", exploration_method="random", agents_see_iot_nodes=True,
                                        save_path="experiments", grid_name="uniform", use_agent_ids=False):
     SIZE = 4
@@ -63,24 +77,19 @@ def train_centralized_agent_off_policy(n_iter, next_destination_method="simple",
     for d in data.values():
         transitions = d["transitions"]
         for pair in transitions:
-            n, t = pair
-
+            n, transition = pair
             if use_agent_ids:
-                id = np.random.choice(possible_ids)
-                id_tensor = torch.tensor([[id]], dtype=torch.float32)
-                id_tensor_2 = torch.tensor([id], dtype=torch.float32)
-                t["state"] = torch.cat((id_tensor, t["state"]), 1)
-                t["next_state"] = torch.cat((id_tensor_2, t["next_state"]), 0)
+                transition = add_randomized_ids_to_transitions(transition=transition, possible_ids=possible_ids)
             agent.memory.push(
-                t["state"].to(DEVICE),
-                t["action"].to(DEVICE),
-                t["next_state"].to(DEVICE),
-                t["reward"].to(DEVICE))
-    
+                transition["state"].to(DEVICE),
+                transition["action"].to(DEVICE),
+                transition["next_state"].to(DEVICE),
+                transition["reward"].to(DEVICE))
+
     del data
 
     # train centralized agent
-    training_iterations = 10000
+    training_iterations = 100
     for step in range(training_iterations):
         agent.optimize_model()
 
