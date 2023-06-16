@@ -26,11 +26,10 @@ def extract_normalized_trip_lengths_per_agent(trips, n_agents):
     return Y, travel_times, travel_steps
 
 
-def generate_plots(trips, n_agents, PATH, extension=""):
+def generate_plots(trips, n_agents, PATH, internal_save_path="/cluster/home/ccarissimo/decongested/cluster_plots", extension=""):
 
     Y, travel_times, travel_steps = extract_normalized_trip_lengths_per_agent(trips, n_agents)
 
-    internal_save_path = "/cluster/home/ccarissimo/decongested/cluster_plots"
     run_name = PATH.split("/")[-1]
     environment = PATH.split("/")[-2]
 

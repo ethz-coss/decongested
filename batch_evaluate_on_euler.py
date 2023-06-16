@@ -1,16 +1,57 @@
 import os
+import numpy as np
 
 os.system("module load gcc/8.2.0 python/3.9.9")  # load appropriate modules for EULER cluster
 
 SAVE_PATH = "/cluster/scratch/ccarissimo/decongested"
 N_ITER = 400000
+NON_STATIONARY = False
+TRAIN = False
 
 for GRID in ["uniform", "random"]:
-    for NEXT_DESTINATION_METHOD in ["simple", "one-way", "random", "work-commute"]:
-        for EXPLORATION_METHOD in ["random", "neighbours"]:
-            for IOT_NODES in [True, False]:
-                for RATIO in [0, 0.05, 0.5, 1]:
-                    os.system(f'sbatch --mem-per-cpu=16G --gpus=1 --time=04:00:00 --wrap="python dqn_grid_evaluate_online.py {N_ITER} {NEXT_DESTINATION_METHOD} {EXPLORATION_METHOD} {SAVE_PATH} {GRID} {RATIO} {"--iot_nodes" if IOT_NODES else ""}"')
+    for NEXT_DESTINATION_METHOD in ["one-way", "work-commute"]:
+        for EXPLORATION_METHOD in ["random"]:
+            for IOT_NODES in [True]:
+                for RATIO in np.linspace(0, 1, 21):
+                    for AGENT_IDS in [True, False]:
+                                os.system(f'sbatch '
+                                          f'--mem-per-cpu=16G '
+                                          f'--gpus=1 '
+                                          f'--time=12:00:00 '
+                                          f'--wrap="python dqn_grid_evaluate_online.py '
+                                          f'{N_ITER} '
+                                          f'{NEXT_DESTINATION_METHOD} '
+                                          f'{EXPLORATION_METHOD} '
+                                          f'{SAVE_PATH} '
+                                          f'{GRID} '
+                                          f'{RATIO} '
+                                          f'{"--iot_nodes" if IOT_NODES else ""}"'
+                                          f'{"--with_ids" if AGENT_IDS else ""}"'
+                                          )
+
+for GRID in ["uniform", "random"]:
+    for NEXT_DESTINATION_METHOD in ["one-way", "work-commute"]:
+        for EXPLORATION_METHOD in ["random"]:
+            for IOT_NODES in [True]:
+                for RATIO in [0, 0.1, 0.5, 0.9, 1]:
+                    for TRAIN in [True, False]:
+                        for NON_STATIONARY in [True, False]:
+                            os.system(f'sbatch '
+                                      f'--mem-per-cpu=16G '
+                                      f'--gpus=1 '
+                                      f'--time=24:00:00 '
+                                      f'--wrap="python dqn_grid_evaluate_online.py '
+                                      f'{N_ITER} '
+                                      f'{NEXT_DESTINATION_METHOD} '
+                                      f'{EXPLORATION_METHOD} '
+                                      f'{SAVE_PATH} '
+                                      f'{GRID} '
+                                      f'{RATIO} '
+                                      f'--iot_nodes '
+                                      f'--with_ids '
+                                      f'{"--non_stationary" if NON_STATIONARY else ""}'
+                                      f'--train"'
+                                      )
 
 # test
 # os.system(f'sbatch --mem-per-cpu=16G --gpus=1 --time=04:00:00 --wrap="python dqn_grid_evaluate_online.py {N_ITER} random random {SAVE_PATH} uniform 0.5 --iot_nodes"')

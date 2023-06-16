@@ -52,6 +52,9 @@ class roadGridOnline:
         self.trips = defaultdict(lambda: [tuple([0, 0, np.array([0, 0])])])
         self.average_trip_time = self.size * 2
 
+    def change_underlying_graph(self, new_graph):
+        self.G = new_graph
+
     def reset(self):
         self.step_counter = np.zeros(self.n_agents)
         self.T = np.zeros(self.n_agents)

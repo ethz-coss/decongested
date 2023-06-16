@@ -98,6 +98,8 @@ if __name__ == "__main__":
     parser.add_argument('centralized_ratio', type=float)
     parser.add_argument('internal_save_path', type=str)  # where to save the processed data
     parser.add_argument('--iot_nodes', action="store_true", default=False)
+    parser.add_argument('--with_agent_ids', action="store_true", default=False)
+    parser.add_argument('--non_stationary', action="store_true", default=False)
     args = parser.parse_args()
 
     path = compose_path(

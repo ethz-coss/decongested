@@ -12,12 +12,14 @@ import plotting
 from grids import generator_functions
 
 from dqn_grid_online import compose_path
+from dqn_grid_train_centralized import add_randomized_ids_to_transitions, add_randomized_id_to_state
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-def main(n_iter, next_destination_method="simple", exploration_method="random", agents_see_iot_nodes=True,
-         save_path="experiments", grid_name="uniform", train=False, centralized_ratio=0):
+def evaluate_trained_models(n_iter, next_destination_method="simple", exploration_method="random", agents_see_iot_nodes=True,
+                            save_path="experiments", grid_name="uniform", train=False, centralized_ratio=0, non_stationary=False,
+                            use_agent_ids=False):
     SIZE = 4
 
     G = generator_functions.generate_4x4_grids(costs=grid_name)
@@ -61,13 +63,9 @@ def main(n_iter, next_destination_method="simple", exploration_method="random", 
         driver.policy_net.to(DEVICE)
         driver.target_net.to(DEVICE)
 
-    if centralized_ratio > 0:
-        with open(f"{PATH}/agent", "rb") as file:
-            agent = pickle.load(file)
+    with open(f"{PATH}/agent{'_with_ids' if use_agent_ids else ''}", "rb") as file:
+        agent = pickle.load(file)
     centralized_mask = np.random.binomial(n=1, p=centralized_ratio, size=N_AGENTS).astype(bool)
-
-    PATH = f"{PATH}/evaluations"
-    Path(PATH).mkdir(parents=True, exist_ok=True)
 
     data = {}
 
@@ -81,31 +79,39 @@ def main(n_iter, next_destination_method="simple", exploration_method="random", 
     )
 
     EVALUATE_ITER = 20000
+    stationarity_switch = True
+    possible_ids = np.linspace(0, 0.99, N_AGENTS)
     state, info, base_state, agents_at_base_state = env.reset()
     for t in range(EVALUATE_ITER):
 
-        action_list = [
-            driver.select_action(
-                state=torch.tensor(state[n], dtype=torch.float32, device=DEVICE),
-                EPS_END=0,
-                EPS_START=0,
-                EPS_DECAY=1,
-                method=EXPLORATION_METHOD,
-                neighbour_beliefs=None).unsqueeze(0)
-            for n, driver in enumerate(drivers.values()) if agents_at_base_state[n]]
+        independent_agents = agents_at_base_state * np.logical_not(centralized_mask)
+        independent_actions = {n:
+                                   driver.select_action(
+                                       state=torch.tensor(state[n], dtype=torch.float32, device=DEVICE),
+                                       EPS_END=0.05,
+                                       EPS_START=0.05,
+                                       EPS_DECAY=1,
+                                       method="random",
+                                       neighbour_beliefs=None).unsqueeze(0)
+                               for n, driver in enumerate(drivers.values()) if independent_agents[n]
+                               }
 
-        agents_that_receive_centralized_recommendation = np.argwhere(agents_at_base_state * centralized_mask)
+        agents_that_receive_centralized_recommendation = agents_at_base_state * centralized_mask
+        dependent_actions = {n:
+                                 agent.select_action(
+                                     state=torch.tensor(add_randomized_id_to_state(state[int(n)], possible_ids),
+                                         dtype=torch.float32, device=DEVICE),
+                                     EPS_END=0.05,
+                                     EPS_START=0.05,
+                                     EPS_DECAY=1,
+                                     method="random",
+                                     neighbour_beliefs=None).unsqueeze(0)
+                             for n, driver in enumerate(drivers.values()) if
+                             agents_that_receive_centralized_recommendation[n]
+                             }
 
-        if centralized_ratio > 0:
-            for index, n in enumerate(agents_that_receive_centralized_recommendation):
-                action_list[index] = agent.select_action(
-                    state=torch.tensor(state[int(n)], dtype=torch.float32, device=DEVICE),
-                    EPS_END=0,
-                    EPS_START=0,
-                    EPS_DECAY=1,
-                    method="random",
-                    neighbour_beliefs=None).unsqueeze(0)
-
+        dependent_actions.update(independent_actions)
+        action_list = [dependent_actions[i] for i, n in enumerate(agents_at_base_state) if agents_at_base_state[i]]
         A = torch.cat(action_list)
         actions = A.cpu().numpy()
 
@@ -120,6 +126,20 @@ def main(n_iter, next_destination_method="simple", exploration_method="random", 
                     transition["reward"])
                 drivers[n].optimize_model()
 
+            for n, transition in transitions:
+                if use_agent_ids:
+                    transition = add_randomized_ids_to_transitions(transition=transition, possible_ids=possible_ids)
+                agent.memory.push(
+                    transition["state"],
+                    transition["action"],
+                    transition["next_state"],
+                    transition["reward"])
+                agent.optimize_model()
+
+        if non_stationary and t > EVALUATE_ITER/2 and stationarity_switch:
+            env.change_underlying_graph(new_graph=generator_functions.generate_4x4_grids(costs="random"))
+            stationarity_switch = False  # such that this is triggered only once
+
         if t % 100 == 0:
             print("step: ", t, "welfare: ", env.average_trip_time, "success rate:", env.reached_destinations.mean(),
                   "exploration rate:", drivers[0].eps_threshold)
@@ -132,7 +152,11 @@ def main(n_iter, next_destination_method="simple", exploration_method="random", 
             "transitions": transitions,
         }
 
-    plotting.generate_plots(env.trips, N_AGENTS, PATH, extension=f"_ratio_{centralized_ratio}")
+    plotting.generate_plots(env.trips, N_AGENTS, PATH, internal_save_path="test_plots",
+                            extension=f"_ratio_{centralized_ratio}{'_with_ids' if use_agent_ids else ''}{'_non_stationary' if non_stationary else ''}")
+
+    PATH = f"{PATH}/evaluations{'_with_ids' if use_agent_ids else ''}{'_non_stationary' if non_stationary else ''}"
+    Path(PATH).mkdir(parents=True, exist_ok=True)
 
     with open(f"{PATH}/data_evaluate_ratio_{centralized_ratio}", "wb") as file:
         pickle.dump(data, file)
@@ -158,11 +182,13 @@ if __name__ == "__main__":
     parser.add_argument('n_iter', type=int)
     parser.add_argument('next_destination_method', type=str)
     parser.add_argument('exploration_method', type=str)
-    parser.add_argument('--iot_nodes', action="store_true", default=False)
     parser.add_argument('save_path', type=str)
     parser.add_argument('grid_name', type=str)
-    parser.add_argument('--train', action="store_true", default=False)
     parser.add_argument('centralized_ratio', type=float)
+    parser.add_argument('--iot_nodes', action="store_true", default=False)
+    parser.add_argument('--train', action="store_true", default=False)
+    parser.add_argument('--non_stationary', action="store_true", default=False)
+    parser.add_argument('--with_ids', action="store_true", default=False)
     args = parser.parse_args()
 
     N_ITER = args.n_iter
@@ -170,7 +196,7 @@ if __name__ == "__main__":
     EXPLORATION_METHOD = args.exploration_method
     AGENTS_SEE_IOT_NODES = args.iot_nodes
 
-    main(
+    evaluate_trained_models(
         n_iter=N_ITER,
         next_destination_method=NEXT_DESTINATION_METHOD,
         exploration_method=EXPLORATION_METHOD,
@@ -178,5 +204,7 @@ if __name__ == "__main__":
         save_path=args.save_path,
         grid_name=args.grid_name,
         train=args.train,
-        centralized_ratio=args.centralized_ratio
+        centralized_ratio=args.centralized_ratio,
+        non_stationary=args.non_stationary,
+        use_agent_ids=args.with_ids
     )
