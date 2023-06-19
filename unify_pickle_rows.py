@@ -3,7 +3,7 @@ import pickle
 import glob
 
 
-def unify_pickle_rows_into_dataframe(path):
+def unify_pickle_rows_into_dataframe(path, multirow=False):
 
     rows = []
 
@@ -11,11 +11,13 @@ def unify_pickle_rows_into_dataframe(path):
         with open(file_path, "rb") as file:
             row = pickle.load(file)
 
-        rows.append(row)
+        if multirow:
+            for element in row:
+                element.append(rows)
+        else:
+            rows.append(row)
 
-    df = pd.DataFrame(rows)
-
-    return df
+    return pd.DataFrame(rows)
 
 
 if __name__ == "__main__":
