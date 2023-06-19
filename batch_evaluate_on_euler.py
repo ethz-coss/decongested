@@ -16,7 +16,7 @@ for GRID in ["uniform", "random"]:
                                   f'--mem-per-cpu=16G '
                                   f'--gpus=1 '
                                   f'--time=12:00:00 '
-                                  f'--job-name=evaluate_{GRID}_{NEXT_DESTINATION_METHOD}_{RATIO}_{AGENT_IDS}'
+                                  f'--job-name=evaluate_{GRID}_{NEXT_DESTINATION_METHOD}_{RATIO}_{AGENT_IDS} '
                                   f'--wrap="python dqn_grid_evaluate_online.py '
                                   f'{N_ITER} '
                                   f'{NEXT_DESTINATION_METHOD} '
