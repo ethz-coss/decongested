@@ -60,6 +60,7 @@ def evaluate_trained_models(n_iter, next_destination_method="simple", exploratio
     for driver in drivers.values():
         driver.steps_done = 0
         driver.memory = ReplayMemory(10000)
+        driver.device = DEVICE
         driver.policy_net.to(DEVICE)
         driver.target_net.to(DEVICE)
 
