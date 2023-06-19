@@ -14,10 +14,10 @@ from grids import generator_functions
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-def add_randomized_ids_to_transitions(transition, possible_ids):
+def add_randomized_ids_to_transitions(transition, possible_ids, device):
     id = np.random.choice(possible_ids)
-    id_tensor = torch.tensor([[id]], dtype=torch.float32)
-    id_tensor_2 = torch.tensor([id], dtype=torch.float32)
+    id_tensor = torch.tensor([[id]], dtype=torch.float32, device=device)
+    id_tensor_2 = torch.tensor([id], dtype=torch.float32, device=device)
     transition["state"] = torch.cat((id_tensor, transition["state"]), 1)
     transition["next_state"] = torch.cat((id_tensor_2, transition["next_state"]), 0)
     return transition

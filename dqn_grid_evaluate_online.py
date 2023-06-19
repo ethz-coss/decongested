@@ -111,7 +111,7 @@ def evaluate_trained_models(n_iter, next_destination_method="simple", exploratio
                              }
 
         dependent_actions.update(independent_actions)
-        action_list = [dependent_actions[i] for i, n in enumerate(agents_at_base_state) if agents_at_base_state[i]]
+        action_list = [dependent_actions[i].to(DEVICE) for i, n in enumerate(agents_at_base_state) if agents_at_base_state[i]]
         A = torch.cat(action_list)
         actions = A.cpu().numpy()
 
@@ -128,7 +128,7 @@ def evaluate_trained_models(n_iter, next_destination_method="simple", exploratio
 
             for n, transition in transitions:
                 if use_agent_ids:
-                    transition = add_randomized_ids_to_transitions(transition=transition, possible_ids=possible_ids)
+                    transition = add_randomized_ids_to_transitions(transition=transition, possible_ids=possible_ids, device=DEVICE)
                 agent.memory.push(
                     transition["state"],
                     transition["action"],

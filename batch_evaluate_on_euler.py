@@ -25,7 +25,7 @@ for GRID in ["uniform", "random"]:
                                           f'{SAVE_PATH} '
                                           f'{GRID} '
                                           f'{RATIO} '
-                                          f'{"--iot_nodes" if IOT_NODES else ""}"'
+                                          f'{"--iot_nodes" if IOT_NODES else ""} '
                                           f'{"--with_ids" if AGENT_IDS else ""}"'
                                           )
 
@@ -34,8 +34,8 @@ for GRID in ["uniform", "random"]:
         for EXPLORATION_METHOD in ["random"]:
             for IOT_NODES in [True]:
                 for RATIO in [0, 0.1, 0.5, 0.9, 1]:
-                    for TRAIN in [True, False]:
-                        for NON_STATIONARY in [True, False]:
+                    for TRAIN in [True]:
+                        for NON_STATIONARY in [True]:
                             os.system(f'sbatch '
                                       f'--mem-per-cpu=16G '
                                       f'--gpus=1 '
@@ -49,7 +49,7 @@ for GRID in ["uniform", "random"]:
                                       f'{RATIO} '
                                       f'--iot_nodes '
                                       f'--with_ids '
-                                      f'{"--non_stationary" if NON_STATIONARY else ""}'
+                                      f'{"--non_stationary" if NON_STATIONARY else ""} '
                                       f'--train"'
                                       )
 
