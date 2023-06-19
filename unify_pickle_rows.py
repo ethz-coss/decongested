@@ -27,9 +27,10 @@ if __name__ == "__main__":
     parser.add_argument('save_path', type=str)  # main directory
     parser.add_argument('internal_save_path', type=str)  # where to save the processed data
     parser.add_argument('output_filename', type=str)  # name of the csv file
+    parser.add_argument('--multirow', action="store_true", default=False)
     args = parser.parse_args()
 
-    df = unify_pickle_rows_into_dataframe(args.save_path)
+    df = unify_pickle_rows_into_dataframe(args.save_path, args.multirow)
 
     path = f"{args.internal_save_path}/{args.output_filename}"
 
