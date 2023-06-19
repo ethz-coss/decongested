@@ -78,7 +78,7 @@ def evaluate_trained_models(n_iter, next_destination_method="simple", exploratio
         agents_see_iot_nodes=AGENTS_SEE_IOT_NODES
     )
 
-    EVALUATE_ITER = 20000
+    EVALUATE_ITER = 100000
     stationarity_switch = True
     possible_ids = np.linspace(0, 0.99, N_AGENTS)
     state, info, base_state, agents_at_base_state = env.reset()
