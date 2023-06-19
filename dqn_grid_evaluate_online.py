@@ -122,20 +122,20 @@ def evaluate_trained_models(n_iter, next_destination_method="simple", exploratio
         if train:
             for n, transition in transitions:
                 drivers[n].memory.push(
-                    transition["state"],
-                    transition["action"],
-                    transition["next_state"],
-                    transition["reward"])
+                    transition["state"].to(DEVICE),
+                    transition["action"].to(DEVICE),
+                    transition["next_state"].to(DEVICE),
+                    transition["reward"].to(DEVICE))
                 drivers[n].optimize_model()
 
             for n, transition in transitions:
                 if use_agent_ids:
                     transition = add_randomized_ids_to_transitions(transition=transition, possible_ids=possible_ids, device=DEVICE)
                 agent.memory.push(
-                    transition["state"],
-                    transition["action"],
-                    transition["next_state"],
-                    transition["reward"])
+                    transition["state"].to(DEVICE),
+                    transition["action"].to(DEVICE),
+                    transition["next_state"].to(DEVICE),
+                    transition["reward"].to(DEVICE))
                 agent.optimize_model()
 
         if non_stationary and t > EVALUATE_ITER/2 and stationarity_switch:
