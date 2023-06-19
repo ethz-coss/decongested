@@ -13,7 +13,7 @@ def unify_pickle_rows_into_dataframe(path, multirow=False):
 
         if multirow:
             for element in row:
-                element.append(rows)
+                rows.append(element)
         else:
             rows.append(row)
 
