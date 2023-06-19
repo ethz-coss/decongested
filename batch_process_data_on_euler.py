@@ -11,11 +11,13 @@ for GRID in ["uniform", "random"]:
         for EXPLORATION_METHOD in ["random"]:
             for IOT_NODES in [True]:
                 for CENTRALIZED_RATIO in np.linspace(0, 1, 21):
-                    os.system(f'sbatch --mem-per-cpu=32G --gpus=1 --time=04:00:00 --wrap="python process_evaluations_data.py '
-                              f'{N_ITER} {NEXT_DESTINATION_METHOD} {EXPLORATION_METHOD} {SAVE_PATH} {GRID} '
-                              f'{CENTRALIZED_RATIO} {INTERNAL_SAVE_PATH}  {"--iot_nodes" if IOT_NODES else ""}" '
-                              f'--job-name=grid-{GRID}-dex-{NEXT_DESTINATION_METHOD}-exp-{EXPLORATION_METHOD}-'
-                              f'iot-{IOT_NODES}-ratio-{CENTRALIZED_RATIO}')
+                    for AGENT_IDS in [True, False]:
+                        os.system(f'sbatch --mem-per-cpu=32G --gpus=1 --time=04:00:00 --wrap="python process_evaluations_data.py '
+                                  f'{N_ITER} {NEXT_DESTINATION_METHOD} {EXPLORATION_METHOD} {SAVE_PATH} {GRID} '
+                                  f'{CENTRALIZED_RATIO} {INTERNAL_SAVE_PATH}  {"--iot_nodes" if IOT_NODES else ""} '
+                                  f'{"--with_agent_ids" if AGENT_IDS else ""}" '
+                                  f'--job-name=grid-{GRID}-dex-{NEXT_DESTINATION_METHOD}-exp-{EXPLORATION_METHOD}-'
+                                  f'iot-{IOT_NODES}-ratio-{CENTRALIZED_RATIO}')
 
 
 # testing non-stationary
