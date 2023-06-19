@@ -67,6 +67,10 @@ class model:
         self.eps_threshold = 1
         self.loss = 0
 
+    def apply_device(self, device):
+        self.policy_net.to(device)
+        self.target_net.to(device)
+
     def judge_state(self, state):
         with torch.no_grad():
             # t.max(1) will return the largest column value of each row.
@@ -156,7 +160,7 @@ class model:
             set_to_none=True)  # set to none option has slightly different behaviour than setting to 0
         self.loss.backward()
 
-        x = [p for p in self.policy_net.parameters()]
+        # x = [p for p in self.policy_net.parameters()]
 
         # In-place gradient clipping
         torch.nn.utils.clip_grad_value_(self.policy_net.parameters(), 100)

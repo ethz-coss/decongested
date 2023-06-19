@@ -61,8 +61,7 @@ def evaluate_trained_models(n_iter, next_destination_method="simple", exploratio
         driver.steps_done = 0
         driver.memory = ReplayMemory(10000)
         driver.device = DEVICE
-        driver.policy_net.to(DEVICE)
-        driver.target_net.to(DEVICE)
+        driver.apply_device(DEVICE)
 
     with open(f"{PATH}/agent{'_with_ids' if use_agent_ids else ''}", "rb") as file:
         agent = pickle.load(file)
