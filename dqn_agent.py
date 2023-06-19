@@ -70,6 +70,7 @@ class model:
     def apply_device(self, device):
         self.policy_net.to(device)
         self.target_net.to(device)
+        self.optimizer = optim.AdamW(self.policy_net.parameters(), lr=self.LR, amsgrad=True)
 
     def judge_state(self, state):
         with torch.no_grad():
@@ -147,7 +148,7 @@ class model:
             with torch.no_grad():
                 x = self.target_net(non_final_next_states)
                 next_state_values[non_final_mask] = x.max(1)[0]
-                y = x.max(1)[1]
+                # y = x.max(1)[1]
         # Compute the expected Q values
         expected_state_action_values = (next_state_values * self.gamma) + reward_batch
 
