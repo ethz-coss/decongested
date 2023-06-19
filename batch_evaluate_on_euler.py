@@ -16,6 +16,7 @@ for GRID in ["uniform", "random"]:
                                   f'--mem-per-cpu=16G '
                                   f'--gpus=1 '
                                   f'--time=12:00:00 '
+                                  f'--job-name=evaluate_{GRID}_{NEXT_DESTINATION_METHOD}_{RATIO}_{AGENT_IDS}'
                                   f'--wrap="python dqn_grid_evaluate_online.py '
                                   f'{N_ITER} '
                                   f'{NEXT_DESTINATION_METHOD} '
@@ -24,8 +25,7 @@ for GRID in ["uniform", "random"]:
                                   f'{GRID} '
                                   f'{RATIO} '
                                   f'--iot_nodes '
-                                  f'{"--with_ids" if AGENT_IDS else ""} '
-                                  f'--job-name=evaluate_{GRID}_{NEXT_DESTINATION_METHOD}_{RATIO}_{AGENT_IDS}"'
+                                  f'{"--with_ids" if AGENT_IDS else ""}"'
                                   )
 
 AGENT_IDS = True
@@ -40,6 +40,7 @@ for GRID in ["uniform"]:
                                       f'--mem-per-cpu=16G '
                                       f'--gpus=1 '
                                       f'--time=24:00:00 '
+                                      f'--job-name=evaluate_non_stationary_{NEXT_DESTINATION_METHOD}_{RATIO} '
                                       f'--wrap="python dqn_grid_evaluate_online.py '
                                       f'{N_ITER} '
                                       f'{NEXT_DESTINATION_METHOD} '
@@ -50,8 +51,7 @@ for GRID in ["uniform"]:
                                       f'--iot_nodes '
                                       f'--with_ids '
                                       f'--non_stationary '
-                                      f'--train '
-                                      f'--job-name=evaluate_non_stationary_{NEXT_DESTINATION_METHOD}_{RATIO}"'
+                                      f'--train"'
                                       )
 
 # test
