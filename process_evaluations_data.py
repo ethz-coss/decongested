@@ -42,7 +42,7 @@ if __name__ == "__main__":
 
     evaluations_path = f"{path}/evaluations{'_with_ids' if args.with_agent_ids else ''}"
     # evaluate trips
-    with open(f"{evaluations_path}/trips_ratio_{args.centralized_ratio}", "rb") as file:
+    with open(f"{evaluations_path}/trips_evaluate_ratio_{args.centralized_ratio}", "rb") as file:
         trips = pickle.load(file)
 
     per_agent_interpolated_trip_lengths, _, _ = extract_normalized_trip_lengths_per_agent(trips, n_agents=100)
