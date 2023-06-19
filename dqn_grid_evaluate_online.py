@@ -99,7 +99,8 @@ def evaluate_trained_models(n_iter, next_destination_method="simple", exploratio
         agents_that_receive_centralized_recommendation = agents_at_base_state * centralized_mask
         dependent_actions = {n:
                                  agent.select_action(
-                                     state=torch.tensor(add_randomized_id_to_state(state[int(n)], possible_ids),
+                                     state=torch.tensor(
+                                         add_randomized_id_to_state(state[int(n)], possible_ids) if use_agent_ids else state[int(n)],
                                          dtype=torch.float32, device=DEVICE),
                                      EPS_END=0.05,
                                      EPS_START=0.05,
@@ -152,8 +153,8 @@ def evaluate_trained_models(n_iter, next_destination_method="simple", exploratio
             "transitions": transitions,
         }
 
-    plotting.generate_plots(env.trips, N_AGENTS, PATH, internal_save_path="test_plots",
-                            extension=f"_ratio_{centralized_ratio}{'_with_ids' if use_agent_ids else ''}{'_non_stationary' if non_stationary else ''}")
+    # plotting.generate_plots(env.trips, N_AGENTS, PATH, internal_save_path="",
+    #                         extension=f"_ratio_{centralized_ratio}{'_with_ids' if use_agent_ids else ''}{'_non_stationary' if non_stationary else ''}")
 
     PATH = f"{PATH}/evaluations{'_with_ids' if use_agent_ids else ''}{'_non_stationary' if non_stationary else ''}"
     Path(PATH).mkdir(parents=True, exist_ok=True)
