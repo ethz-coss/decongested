@@ -118,6 +118,8 @@ if __name__ == "__main__":
         lr=1e-2
     )
 
+    training_results = {}
+
     # online trips
     with open(f"{path}/trips", "rb") as file:
         trips = pickle.load(file)
