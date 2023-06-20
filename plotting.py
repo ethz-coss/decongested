@@ -13,11 +13,11 @@ def extract_normalized_trip_lengths_per_agent(trips, n_agents):
             np.diff(np.array([metrics[2] for metrics in trip[1:]]), axis=0).sum(axis=1).sum(axis=1))
         trip_freeflow_length = np.concatenate([np.array([6]), trip_freeflow_length])
         normalization = np.where(trip_freeflow_length == 0, 2, trip_freeflow_length)
-        max_step = max(max_step, trip_step[-1])
+        max_step = max(max_step, trip_time[-1])
         travel_times[agent] = np.diff(trip_time) / normalization
-        travel_steps[agent] = trip_step[1:]
+        travel_steps[agent] = trip_time[1:]
 
-    x = np.arange(0, max_step)
+    x = np.arange(0, int(max_step))
     Y = np.zeros((n_agents, int(max_step)))
     for agent, times in travel_times.items():
         y = np.interp(x, travel_steps[agent], times)

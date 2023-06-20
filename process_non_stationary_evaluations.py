@@ -5,7 +5,7 @@ if __name__ == "__main__":
     from dqn_grid_online import compose_path
     from pathlib import Path
     from pre_process_data import extract_transitions_from_data, extract_moving_average_from_data, \
-        count_state_action_visits, calculate_driver_entropy
+        count_state_action_visits, calculate_driver_entropy, extract_normalized_trip_lengths_per_agent
     import pickle
     import argparse
 
@@ -55,8 +55,14 @@ if __name__ == "__main__":
 
     del data
 
+    with open(f"{evaluations_path}/trips_evaluate_ratio_{args.centralized_ratio}", "rb") as file:
+        trips = pickle.load(file)
+
+    trip_lengths, _, _ = extract_normalized_trip_lengths_per_agent(trips, n_agents=100)
+    system_average = trip_lengths.mean(axis=0)
+
     rows = []
-    for t in range(len(moving_average)):
+    for t in range(system_average.shape[1]):
         row = {
             "grid": args.grid_name,
             "dex": args.next_destination_method,
@@ -66,7 +72,7 @@ if __name__ == "__main__":
             "iot-nodes": args.iot_nodes,
             "ratio": args.centralized_ratio,
             "time": t,
-            "moving_average": moving_average[t]
+            "moving_average": system_average[t]
         }
         rows.append(row)
 
