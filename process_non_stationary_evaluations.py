@@ -62,7 +62,7 @@ if __name__ == "__main__":
     system_average = trip_lengths.mean(axis=0)
 
     rows = []
-    for t in range(system_average.shape[1]):
+    for t in range(system_average.shape[0]):
         row = {
             "grid": args.grid_name,
             "dex": args.next_destination_method,
