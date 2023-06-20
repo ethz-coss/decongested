@@ -24,7 +24,7 @@ N_ITER = 400000
 INTERNAL_SAVE_PATH = "/cluster/home/ccarissimo/decongested/processed_non_stationary_data"
 for GRID in ["uniform"]:
     for NEXT_DESTINATION_METHOD in ["one-way", "work-commute"]:
-        for EXPLORATION_METHOD in ["random", "neighbours"]:
+        for EXPLORATION_METHOD in ["random"]:
             for IOT_NODES in [True]:
                 for CENTRALIZED_RATIO in [0, 0.1, 0.5, 0.9, 1]:
                     os.system(f'sbatch --mem-per-cpu=32G --gpus=1 --time=04:00:00 --wrap="python process_non_stationary_evaluations.py '
