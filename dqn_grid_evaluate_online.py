@@ -22,7 +22,7 @@ def evaluate_trained_models(n_iter, next_destination_method="simple", exploratio
                             use_agent_ids=False):
     SIZE = 4
 
-    G = generator_functions.generate_4x4_grids(costs=grid_name)
+    G = generator_functions.generate_4x4_grids(costs=grid_name, seed=0)
 
     print([node for node in G.nodes()])
 
@@ -138,7 +138,7 @@ def evaluate_trained_models(n_iter, next_destination_method="simple", exploratio
                 agent.optimize_model()
 
         if non_stationary and t > EVALUATE_ITER/2 and stationarity_switch:
-            env.change_underlying_graph(new_graph=generator_functions.generate_4x4_grids(costs="random"))
+            env.change_underlying_graph(new_graph=generator_functions.generate_4x4_grids(costs="random", seed=1))
             stationarity_switch = False  # such that this is triggered only once
 
         if t % 100 == 0:
@@ -156,7 +156,7 @@ def evaluate_trained_models(n_iter, next_destination_method="simple", exploratio
     # plotting.generate_plots(env.trips, N_AGENTS, PATH, internal_save_path="",
     #                         extension=f"_ratio_{centralized_ratio}{'_with_ids' if use_agent_ids else ''}{'_non_stationary' if non_stationary else ''}")
 
-    PATH = f"{PATH}/evaluations{'_with_ids' if use_agent_ids else ''}{'_non_stationary' if non_stationary else ''}"
+    PATH = f"{PATH}/evaluations{'_with_ids' if use_agent_ids else ''}{'_non_stationary' if non_stationary else ''}/random_random"
     Path(PATH).mkdir(parents=True, exist_ok=True)
 
     with open(f"{PATH}/data_evaluate_ratio_{centralized_ratio}", "wb") as file:

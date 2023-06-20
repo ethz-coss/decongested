@@ -29,7 +29,7 @@ N_ITER = 400000
 #                                   )
 
 AGENT_IDS = True
-for GRID in ["uniform"]:
+for GRID in ["random"]:
     for NEXT_DESTINATION_METHOD in ["one-way", "work-commute"]:
         for EXPLORATION_METHOD in ["random"]:
             for IOT_NODES in [True]:

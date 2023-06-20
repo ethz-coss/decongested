@@ -2,7 +2,7 @@ import networkx as nx
 import numpy as np
 
 
-def generate_4x4_grids(costs):
+def generate_4x4_grids(costs, seed=0):
     size = 4
 
     if costs == "uniform":
@@ -12,7 +12,7 @@ def generate_4x4_grids(costs):
         return G
 
     elif costs == "random":
-        np.random.seed(seed=0)
+        np.random.seed(seed=seed)
         rG = nx.grid_graph(dim=(size, size))
         for e in rG.edges():
             rG.edges[e]["cost"] = lambda x: np.random.random() + x / 100
