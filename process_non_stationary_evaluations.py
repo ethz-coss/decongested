@@ -38,7 +38,7 @@ if __name__ == "__main__":
         lr=1e-2
     )
 
-    evaluations_path = f"{path}/evaluations_with_ids_non_stationary"
+    evaluations_path = f"{path}/evaluations_with_ids_non_stationary/random_random"  # added random_random hardcode
 
     # evaluate data
     with open(f"{evaluations_path}/data_evaluate_ratio_{args.centralized_ratio}", "rb") as file:

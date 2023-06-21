@@ -135,7 +135,7 @@ def evaluate_trained_models(n_iter, next_destination_method="simple", exploratio
                     transition["action"].to(DEVICE),
                     transition["next_state"].to(DEVICE),
                     transition["reward"].to(DEVICE))
-                agent.optimize_model()
+            agent.optimize_model()  # un-indented to train only once, and not len(transitions) times
 
         if non_stationary and t > EVALUATE_ITER/2 and stationarity_switch:
             env.change_underlying_graph(new_graph=generator_functions.generate_4x4_grids(costs="random", seed=1))
