@@ -22,7 +22,7 @@ N_ITER = 400000
 
 # testing non-stationary
 INTERNAL_SAVE_PATH = "/cluster/home/ccarissimo/decongested/processed_non_stationary_data"
-for GRID in ["uniform"]:
+for GRID in ["random"]:
     for NEXT_DESTINATION_METHOD in ["one-way", "work-commute"]:
         for EXPLORATION_METHOD in ["random"]:
             for IOT_NODES in [True]:
