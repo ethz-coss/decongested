@@ -78,10 +78,12 @@ def evaluate_trained_models(n_iter, next_destination_method="simple", exploratio
         agents_see_iot_nodes=AGENTS_SEE_IOT_NODES
     )
 
-    EVALUATE_ITER = 100000
+    TRANSIENT_LENGTH = 50000
+    EVALUATE_ITER = 100000 + TRANSIENT_LENGTH
     stationarity_switch = True
     possible_ids = np.linspace(0, 0.99, N_AGENTS)
     state, info, base_state, agents_at_base_state = env.reset()
+
     for t in range(EVALUATE_ITER):
 
         independent_agents = agents_at_base_state * np.logical_not(centralized_mask)
@@ -118,7 +120,7 @@ def evaluate_trained_models(n_iter, next_destination_method="simple", exploratio
 
         state, base_state, agents_at_base_state, transitions, done = env.step(actions, drivers)
 
-        if train:
+        if train and t > TRANSIENT_LENGTH:
             for n, transition in transitions:
                 drivers[n].memory.push(
                     transition["state"].to(DEVICE),
@@ -147,7 +149,7 @@ def evaluate_trained_models(n_iter, next_destination_method="simple", exploratio
 
         # SAVE PROGRESS DATA[agents]
         data[t] = {
-            # "T": env.T,
+            "T": env.T.max(),
             # "S": env.S,
             "average_trip_time": env.average_trip_time,
             "transitions": transitions,
