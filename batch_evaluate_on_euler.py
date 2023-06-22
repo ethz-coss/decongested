@@ -29,6 +29,7 @@ N_ITER = 400000
 #                                   )
 
 AGENT_IDS = True
+EXPERIMENT_NAME = "random_random_transient"
 for GRID in ["random"]:
     for NEXT_DESTINATION_METHOD in ["one-way", "work-commute"]:
         for EXPLORATION_METHOD in ["random"]:
@@ -48,6 +49,7 @@ for GRID in ["random"]:
                                       f'{SAVE_PATH} '
                                       f'{GRID} '
                                       f'{RATIO} '
+                                      f'{EXPERIMENT_NAME} '
                                       f'--iot_nodes '
                                       f'--with_ids '
                                       f'--non_stationary '

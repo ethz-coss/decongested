@@ -21,6 +21,7 @@ N_ITER = 400000
 
 
 # testing non-stationary
+EXPERIMENT_NAME = "random_random_transient"
 INTERNAL_SAVE_PATH = "/cluster/home/ccarissimo/decongested/processed_non_stationary_data"
 for GRID in ["random"]:
     for NEXT_DESTINATION_METHOD in ["one-way", "work-commute", "random"]:
@@ -29,7 +30,8 @@ for GRID in ["random"]:
                 for CENTRALIZED_RATIO in [0, 0.1, 0.5, 0.9, 1]:
                     os.system(f'sbatch --mem-per-cpu=32G --gpus=1 --time=04:00:00 --wrap="python process_non_stationary_evaluations.py '
                               f'{N_ITER} {NEXT_DESTINATION_METHOD} {EXPLORATION_METHOD} {SAVE_PATH} {GRID} '
-                              f'{CENTRALIZED_RATIO} {INTERNAL_SAVE_PATH}  {"--iot_nodes" if IOT_NODES else ""}" '
+                              f'{CENTRALIZED_RATIO} {INTERNAL_SAVE_PATH} {EXPERIMENT_NAME}'
+                              f'{"--iot_nodes" if IOT_NODES else ""}" '
                               f'--job-name=grid-{GRID}-dex-{NEXT_DESTINATION_METHOD}-exp-{EXPLORATION_METHOD}-'
                               f'iot-{IOT_NODES}-ratio-{CENTRALIZED_RATIO}')
 

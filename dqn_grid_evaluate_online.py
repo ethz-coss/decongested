@@ -19,7 +19,7 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def evaluate_trained_models(n_iter, next_destination_method="simple", exploration_method="random", agents_see_iot_nodes=True,
                             save_path="experiments", grid_name="uniform", train=False, centralized_ratio=0, non_stationary=False,
-                            use_agent_ids=False):
+                            use_agent_ids=False, experiment_name=""):
     SIZE = 4
 
     G = generator_functions.generate_4x4_grids(costs=grid_name, seed=0)
@@ -158,7 +158,7 @@ def evaluate_trained_models(n_iter, next_destination_method="simple", exploratio
     # plotting.generate_plots(env.trips, N_AGENTS, PATH, internal_save_path="",
     #                         extension=f"_ratio_{centralized_ratio}{'_with_ids' if use_agent_ids else ''}{'_non_stationary' if non_stationary else ''}")
 
-    PATH = f"{PATH}/evaluations{'_with_ids' if use_agent_ids else ''}{'_non_stationary' if non_stationary else ''}/random_random"
+    PATH = f"{PATH}/evaluations{'_with_ids' if use_agent_ids else ''}{'_non_stationary' if non_stationary else ''}/{experiment_name}"
     Path(PATH).mkdir(parents=True, exist_ok=True)
 
     with open(f"{PATH}/data_evaluate_ratio_{centralized_ratio}", "wb") as file:
@@ -188,26 +188,23 @@ if __name__ == "__main__":
     parser.add_argument('save_path', type=str)
     parser.add_argument('grid_name', type=str)
     parser.add_argument('centralized_ratio', type=float)
+    parser.add_argument('experiment_name', type=str)
     parser.add_argument('--iot_nodes', action="store_true", default=False)
     parser.add_argument('--train', action="store_true", default=False)
     parser.add_argument('--non_stationary', action="store_true", default=False)
     parser.add_argument('--with_ids', action="store_true", default=False)
     args = parser.parse_args()
 
-    N_ITER = args.n_iter
-    NEXT_DESTINATION_METHOD = args.next_destination_method
-    EXPLORATION_METHOD = args.exploration_method
-    AGENTS_SEE_IOT_NODES = args.iot_nodes
-
     evaluate_trained_models(
-        n_iter=N_ITER,
-        next_destination_method=NEXT_DESTINATION_METHOD,
-        exploration_method=EXPLORATION_METHOD,
-        agents_see_iot_nodes=AGENTS_SEE_IOT_NODES,
+        n_iter=args.n_iter,
+        next_destination_method=args.next_destination_method,
+        exploration_method=args.exploration_method,
+        agents_see_iot_nodes=args.iot_nodes,
         save_path=args.save_path,
         grid_name=args.grid_name,
         train=args.train,
         centralized_ratio=args.centralized_ratio,
         non_stationary=args.non_stationary,
-        use_agent_ids=args.with_ids
+        use_agent_ids=args.with_ids,
+        experiment_name=args.experiment_name
     )
