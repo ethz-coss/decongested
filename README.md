@@ -36,6 +36,10 @@ In this paper we take MDP congestion games as our ground model, create a simulat
 - How can local interaction rules enable effective Online Collaborative MARL?
 - How can circularity be defined in the context of logistics and transportation?
 
+## Preliminary Results
+
+<img src="images/congestion_in_non_stationary_logistics_networks.png" align="center" width="100%"/>
+
 ## Background
 
 ### Routing, route choice, congestion games
