@@ -33,7 +33,8 @@ for GRID in ["random"]:
                               f'{N_ITER} {NEXT_DESTINATION_METHOD} {EXPLORATION_METHOD} {SAVE_PATH} {GRID} '
                               f'{CENTRALIZED_RATIO} {INTERNAL_SAVE_PATH} {EXPERIMENT_NAME} '
                               f'{"--iot_nodes" if IOT_NODES else ""} '
-                              f'{"--non_stationary"}" '
+                              f'--non_stationary '
+                              f'--with_agent_ids" '  # end of wrapped python command
                               f'--job-name=grid-{GRID}-dex-{NEXT_DESTINATION_METHOD}-exp-{EXPLORATION_METHOD}-'
                               f'iot-{IOT_NODES}-ratio-{CENTRALIZED_RATIO}')
 
