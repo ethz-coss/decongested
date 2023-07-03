@@ -17,6 +17,7 @@ if __name__ == "__main__":
     parser.add_argument('grid_name', type=str)  # subdirectory
     parser.add_argument('centralized_ratio', type=float)
     parser.add_argument('internal_save_path', type=str)  # where to save the processed data
+    parser.add_argument('experiment_name', type=str)  # name for the experiments directory at the save path
     parser.add_argument('--iot_nodes', action="store_true", default=False)
     parser.add_argument('--with_agent_ids', action="store_true", default=False)
     parser.add_argument('--non_stationary', action="store_true", default=False)
@@ -38,7 +39,10 @@ if __name__ == "__main__":
         lr=1e-2
     )
 
-    evaluations_path = f"{path}/evaluations_with_ids_non_stationary/random_random"  # added random_random hardcode
+    evaluations_path = f"{path}" \
+                       f"/evaluations{'_with_ids' if args.with_agent_ids else ''}" \
+                       f"{'_non_stationary' if args.non_stationary else ''}" \
+                       f"/{args.experiment_name}"
 
     # evaluate data
     with open(f"{evaluations_path}/data_evaluate_ratio_{args.centralized_ratio}", "rb") as file:

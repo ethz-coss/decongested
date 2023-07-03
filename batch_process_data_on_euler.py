@@ -28,10 +28,12 @@ for GRID in ["random"]:
         for EXPLORATION_METHOD in ["random"]:
             for IOT_NODES in [True]:
                 for CENTRALIZED_RATIO in [0, 0.1, 0.5, 0.9, 1]:
-                    os.system(f'sbatch --mem-per-cpu=32G --gpus=1 --time=04:00:00 --wrap="python process_non_stationary_evaluations.py '
+                    os.system(f'sbatch --mem-per-cpu=32G --gpus=1 --time=04:00:00 --wrap="python '
+                              f'process_non_stationary_evaluations.py '
                               f'{N_ITER} {NEXT_DESTINATION_METHOD} {EXPLORATION_METHOD} {SAVE_PATH} {GRID} '
-                              f'{CENTRALIZED_RATIO} {INTERNAL_SAVE_PATH} {EXPERIMENT_NAME}'
+                              f'{CENTRALIZED_RATIO} {INTERNAL_SAVE_PATH} {EXPERIMENT_NAME} '
                               f'{"--iot_nodes" if IOT_NODES else ""}" '
+                              f'{"--non_stationary"} '
                               f'--job-name=grid-{GRID}-dex-{NEXT_DESTINATION_METHOD}-exp-{EXPLORATION_METHOD}-'
                               f'iot-{IOT_NODES}-ratio-{CENTRALIZED_RATIO}')
 
