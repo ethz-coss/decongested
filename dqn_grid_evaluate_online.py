@@ -120,7 +120,7 @@ def evaluate_trained_models(n_iter, next_destination_method="simple", exploratio
 
         state, base_state, agents_at_base_state, transitions, done = env.step(actions, drivers)
 
-        if train and t > TRANSIENT_LENGTH:
+        if train and env.T.max() > 5000:
             for n, transition in transitions:
                 drivers[n].memory.push(
                     transition["state"].to(DEVICE),
@@ -139,7 +139,7 @@ def evaluate_trained_models(n_iter, next_destination_method="simple", exploratio
                     transition["reward"].to(DEVICE))
             agent.optimize_model()  # un-indented to train only once, and not len(transitions) times
 
-        if non_stationary and t > EVALUATE_ITER/2 and stationarity_switch:
+        if non_stationary and env.T.max() > 10000 and stationarity_switch:
             env.change_underlying_graph(new_graph=generator_functions.generate_4x4_grids(costs="random", seed=1))
             stationarity_switch = False  # such that this is triggered only once
 
