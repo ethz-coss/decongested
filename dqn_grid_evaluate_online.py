@@ -84,7 +84,12 @@ def evaluate_trained_models(n_iter, next_destination_method="simple", exploratio
     possible_ids = np.linspace(0, 0.99, N_AGENTS)
     state, info, base_state, agents_at_base_state = env.reset()
 
-    for t in range(EVALUATE_ITER):
+    t = 0
+    switches = [15000, 17500, 20000, 22500, 25000, 27500]
+    threshold = switches.pop(0)
+    seed = 0
+    #for t in range(EVALUATE_ITER):
+    while env.T.max() < 30000:
 
         independent_agents = agents_at_base_state * np.logical_not(centralized_mask)
         independent_actions = {n:
@@ -120,7 +125,7 @@ def evaluate_trained_models(n_iter, next_destination_method="simple", exploratio
 
         state, base_state, agents_at_base_state, transitions, done = env.step(actions, drivers)
 
-        if train and env.T.max() > 5000:
+        if train and env.T.max() > 10000:
             for n, transition in transitions:
                 drivers[n].memory.push(
                     transition["state"].to(DEVICE),
@@ -139,9 +144,14 @@ def evaluate_trained_models(n_iter, next_destination_method="simple", exploratio
                     transition["reward"].to(DEVICE))
             agent.optimize_model()  # un-indented to train only once, and not len(transitions) times
 
-        if non_stationary and env.T.max() > 10000 and stationarity_switch:
-            env.change_underlying_graph(new_graph=generator_functions.generate_4x4_grids(costs="random", seed=1))
-            stationarity_switch = False  # such that this is triggered only once
+        if non_stationary and env.T.max() >= threshold and stationarity_switch:
+            seed += 1
+            env.change_underlying_graph(new_graph=generator_functions.generate_4x4_grids(costs="random", seed=seed))
+            # stationarity_switch = False  # such that this is triggered only once
+            if len(switches) > 0:
+                threshold = switches.pop(0)
+            else:
+                threshold = 100000  #larger than will be reached
 
         if t % 100 == 0:
             print("step: ", t, "welfare: ", env.average_trip_time, "success rate:", env.reached_destinations.mean(),
@@ -154,9 +164,7 @@ def evaluate_trained_models(n_iter, next_destination_method="simple", exploratio
             "average_trip_time": env.average_trip_time,
             "transitions": transitions,
         }
-
-    # plotting.generate_plots(env.trips, N_AGENTS, PATH, internal_save_path="",
-    #                         extension=f"_ratio_{centralized_ratio}{'_with_ids' if use_agent_ids else ''}{'_non_stationary' if non_stationary else ''}")
+        t += 1
 
     PATH = f"{PATH}/evaluations{'_with_ids' if use_agent_ids else ''}{'_non_stationary' if non_stationary else ''}/{experiment_name}"
     Path(PATH).mkdir(parents=True, exist_ok=True)
