@@ -42,6 +42,17 @@ In this paper we take MDP congestion games as our ground model, create a simulat
 
 ## Background
 
+### Circular Economy
+The EU defines the Circular Economy as:
+
+> `a model of production and consumption, which involves sharing, leasing, reusing, repairing, refurbishing and recycling existing materials and products as long as possible. In this way, the life cycle of products is extended'.
+
+In this definition are featured the producers and consumers in an economy, but we miss a crucial component which connects the two: the supply chain. Supply chains are to the economy what the electrical grid is to the internet, what the arteries and veins are to animal bodies.
+
+The circular economy defined for the producers and consumers has the clear target of the products. Producers should find ways to reuse and recycle materials in their pipelines. Consumers should find ways to similarly, reuse and share products they have purchased and seek to repair and refurbish their used goods. Again this is a very product centered, materials focused perspective which is necessary for this relationship. But if we think of supply chains, the infrastructure of the economy, which is not concerned with the products themselves, but with the distribution and connections that enable these products to be exchanged; what is then circularity for a supply chain?
+
+In this research we will focus on information as a key component of supply chain circularity in its effects on the effective use of shared resources. The information available to the participants in a supply chain is often partial and incomplete which can lead to an ineffective use of share resources like road networks, shipping containers, and warehouses. Moreover, the participants in supply chains can be both independent actors in competition and coordinated players in of the same company. Therefore, a variety of tools from game theory can be useful to analyze the systems. In this research we will focus on the case of shared resource games, also known as congestion games, which have been often used to model congestion in traffic on roads and the internet. We will consider cases where the shared resources are subject to exogenous shocks and assess the ability of the supply network to adapt and recover from the changes to the underlying network. In particular, we will assess the differences in dynamics that are due to a degree of centralization: a fully decentralized network is one where all actors are independent and make their decisions by considering information available to them locally, while a fully centralized network is guided by a unique decision makers which has access to all the global information to coordinate the individual actors.
+
 ### Routing, route choice, congestion games
 
 **Congestion Games** complexity of pure NE \cite{fabrikant2004complexity}. For symmetric games, pure NE can be computed in polynomial time with the potential function. For general games complexity is PLS-complete. Atomic Congestion Games introduced in \cite{tekin2012atomic}.
