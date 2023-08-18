@@ -1,30 +1,32 @@
 <img src="images/logo.png" align="left" width="45%"/>
 <img src="images/coci_logo.png" align="center" width="45%"/>
 
-# DeCongested: learning to share for self-organized logistics
+# DeCongested: where self-organization can promote circularity in logistics
 
 ## Overview
-DeCongested is a repository built and maintained by the Computational Social Science group at ETHZ, supported by the ’Co-Evolving City Life - CoCi’ project through the European Research Council (ERC) under the European Union’s Horizon 2020 research and innovation programme (grant agreement No. 833168). 
+DeCongested is a repository built and maintained by the Computational Social Science group at ETHZ, supported by the ’Co-Evolving City Life - CoCi’ project through the European Research Council (ERC) under the European Union’s Horizon 2020 research and innovation programme (grant agreement No. 833168).
 
-The main research question guiding this research is:
+The broad research question from this ERC grant is:
 > How can self-organization and resilience principles be used in a way that makes cities more sustainable?
 
-This particular project focuses on transport and logistics networks and studies the ability of learning agents to leverage self-organization and continuously learn to share networked resources. This investigation involves frontier research at the intersection of game theory, machine learning, traffic science, and complex systems.
+This particular project focuses on transport and logistics and studies the ability of learning agents that leverage local information sharing to become more circular.
+
+The specific research question for this repository is:
+> How are the dynamics of a system of deep $Q$-learners that share model parameters (as in federated learning) affected when collaboratively solving congestion games in networks?
 
 ### Repository Contents
 - dqn_agent contains the functions to run a Deep Q-Learning model
 - dqn_grid runs a DQN agent in the specified environment
 - dqn_grid_results is a helper jupyter notebook designed to plot and analyze the results from runs from dqn_grid
-- environment contains the environment classes that implement the decentralized and asynchronous multi-player atomic routing simulation 
+- environment contains the environment classes that implement the decentralized and asynchronous multi-player atomic routing simulation
 
-
-## Introduction
+## Background
 Multi agent systems require coordination to achieve system optimal performance. Except for few simple cases, this coordination can not be achieved without explicit collaboration, reliably. 
 
 Cities create the playground within which a rich multi agent system can develop. Within this multi agent system we can identify many simultaneous, concurrent 'games' that citizens 'play' (quotation marks to emphasize that we are using these terms before defining them rigorously). Games characterized by players, actions, and utility functions over the actions of all players, are simplified settings within which equilibrium concepts (Nash Equilibrium, Correlated Equilibrium) or non-equilibrium dynamics (Limit Cycles, Chaos) can be rigorously defined and studied. In this project we focus on the games that can be found in transportation and logistics like route choice, pickup and delivery, and packet routing, which are aptly subsumed by congestion games and variants thereof. 
 
 > N.B. Cities are open systems, which means that the games played locally by a subset of individuals may have consequences for the players of the many concurrent games that occur in the neighbourhood of the game. In cities, traffic jams on single roads can have consequences that extend beyond those roads, even beyond traffic: e.g. drivers change their paths to avoid that road, drivers take to walking or public transport, pollution levels increase which may affect the value of real estate. 
-> 
+
 ### Games and the Economy
 
 ### The Circular Economy
@@ -32,7 +34,7 @@ The circular economy is a term used to describe a new economic system defined by
 
 > `a model of production and consumption, which involves sharing, leasing, reusing, repairing, refurbishing and recycling existing materials and products as long as possible. In this way, the life cycle of products is extended'.
 
-In this definition are featured the producers and consumers of an economy in relation to the goods which the economy produces. This definition also lists some central practices which produces and consumers can apply, namely sharing, leasing, reusing, repairing, refurbishing and recycling. For the EU a successful circular economy will enable the material goods in an economy to remain part of the economy, and maintain or transform their value, without becoming waste has lost intrinsic value and must be disposed. 
+In this definition are featured the producers and consumers of an economy in relation to the goods which the economy produces. This definition also lists some central practices which producers and consumers can apply, namely sharing, leasing, reusing, repairing, refurbishing and recycling. For the EU a successful circular economy will enable the material goods in an economy to remain part of the economy, and maintain or transform their value without becoming waste that has lost intrinsic value and must be disposed.
 
 #### The role of Information in the Circular Economy
 
