@@ -19,11 +19,38 @@ def generate_4x4_grids(costs, seed=0):
 
         return rG
 
+    elif costs == "initial":
+        G = nx.grid_graph(dim=(size, size))
+        edge_list = [edge for edge in G.edges]
+
+        dG = nx.DiGraph(incoming_graph_data=edge_list)
+
+        for node in dG.nodes():
+            edges = dG.edges(node)
+            for edge in edges:
+                if edge[1][0] == edge[0][0] + 1:
+                    # set cost to variable
+                    dG.edges[edge]["cost"] = lambda x: x / 100
+                elif edge[1][1] == edge[0][1] + 1:
+                    # set cost to fixed
+                    dG.edges[edge]["cost"] = lambda x: 1
+        return dG
+
     elif costs == "braess":
         G = nx.grid_graph(dim=(size, size))
         edge_list = [edge for edge in G.edges]
 
         dG = nx.DiGraph(incoming_graph_data=edge_list)
+
+        for node in dG.nodes():
+            edges = dG.edges(node)
+            for edge in edges:
+                if edge[1][1] == edge[0][1] + 1:
+                    # set cost to variable
+                    dG.edges[edge]["cost"] = lambda x: x / 100
+                elif edge[1][0] == edge[0][0] + 1:
+                    # set cost to fixed
+                    dG.edges[edge]["cost"] = lambda x: 1
 
         dG.add_edge((0, 1), (1, 0), cost=lambda x: 0)
         dG.add_edge((0, 2), (1, 1), cost=lambda x: 0)
@@ -35,13 +62,4 @@ def generate_4x4_grids(costs, seed=0):
         dG.add_edge((2, 2), (3, 1), cost=lambda x: 0)
         dG.add_edge((2, 3), (3, 2), cost=lambda x: 0)
 
-        for node in dG.nodes():
-            edges = dG.edges(node)
-            for edge in edges:
-                if edge[1][0] == edge[0][0] + 1:
-                    # set cost to variable
-                    dG.edges[edge]["cost"] = lambda x: x / 100
-                elif edge[1][1] == edge[0][1] + 1:
-                    # set cost to fixed
-                    dG.edges[edge]["cost"] = lambda x: 1
         return dG

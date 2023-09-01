@@ -12,7 +12,10 @@ class roadGridOnline:
     def __init__(self, graph, n_agents, n_actions, size, next_destination_method, agents_see_iot_nodes):
         self.agents_see_iot_nodes = agents_see_iot_nodes
         self.next_destination_method = next_destination_method
+        self.episode_method = "fixed_step"
         self.work_commute_destinations = {}
+        self.n_agents = n_agents
+        self.S = None
         if self.next_destination_method == "work-commute":
             # generate work-commute OD pairs
             for n in range(n_agents):
@@ -23,7 +26,7 @@ class roadGridOnline:
                 self.work_commute_destinations[n] = [origin, destination]
 
         self.destinations_counts = None
-        self.stored_transitions = None
+        self.stored_transitions = {}
         self.current_state = None
         self.states_counts = None
         self.reached_destinations = None
@@ -31,15 +34,15 @@ class roadGridOnline:
         self.agents_in_transit = None
         self.step_counter = None
         self.done = None
-        self.trajectory = None
+        self.trajectory = []
+        self.timeout = 64
         self.actions_taken = None
         self.destinations = None
-        self.S = None
-        self.T = None
+        self.T = np.zeros(self.n_agents)
         self.base_state = None
         self.agents_at_base_state = None
+        self.agents_for_next_step = None
         self.G = graph
-        self.n_agents = n_agents
         self.n_actions = n_actions  # max node degree
         self.n_states = len(self.G.nodes)  # to be defined
         self.size = size
@@ -49,8 +52,11 @@ class roadGridOnline:
             (l, r) in self.G.nodes()}
         self.training_visitation_counts = defaultdict(self._return_0)
         self.node_last_utilization = {node: np.ones(self.n_actions) / self.n_actions for node in self.G.nodes}
-        self.trips = defaultdict(lambda: [tuple([0, 0, np.array([0, 0])])])
+        self.trips = defaultdict(self._return_trips_list)
         self.average_trip_time = self.size * 2
+
+    def _return_trips_list(self):
+        return [tuple([0, 0, np.array([0, 0])])]
 
     def change_underlying_graph(self, new_graph):
         self.G = new_graph
@@ -58,26 +64,29 @@ class roadGridOnline:
     def reset(self):
         self.step_counter = np.zeros(self.n_agents)
         self.T = np.zeros(self.n_agents)
-        self.S = np.zeros((self.n_agents, 2)).astype(int)  # two dim, for two dim states
-
-        self.destinations = np.ones((self.n_agents, 2)) * np.array([self.size - 1, self.size - 1])
+        self.S = np.zeros((self.n_agents, 2))  # default initial state
+        self.destinations = np.zeros((self.n_agents, 2))
+        self.reached_destinations = np.zeros(self.n_agents)
         if self.next_destination_method == "work-commute":
             for agent, od_pair in self.work_commute_destinations.items():
                 next_destination = od_pair.pop()
+                origin = od_pair.pop()
                 self.destinations[agent] = next_destination
+                self.S[agent] = origin
+                od_pair.insert(0, origin)
                 od_pair.insert(0, next_destination)
+        elif self.next_destination_method == "one-way":
+            self.destinations = np.ones((self.n_agents, 2)) * np.array([self.size-1, self.size-1])
+        else:
+            raise "non yet coded for other types of methods"
 
         self.actions_taken = np.zeros((self.size, self.size, self.n_actions)).astype(int)
-        self.trajectory = []
+        # self.trajectory = []
         self.done = np.zeros(self.n_agents)
         info = {}
-        self.stored_transitions = {}
-        remaining_agents = np.ones(self.n_agents, dtype=bool)
-        first_agents = remaining_agents
-        uni = np.unique(self.S[first_agents], axis=0)
-
-        self.base_state = tuple(uni[np.random.randint(len(uni))])
-        self.agents_at_base_state = np.where((self.S == self.base_state).all(axis=1), True, False) * first_agents
+        occupied_states, occupied_states_counts = np.unique(self.S, return_counts=True, axis=0)
+        self.base_state = tuple(occupied_states[np.random.randint(len(occupied_states))])
+        self.agents_at_base_state = np.where((self.S == self.base_state).all(axis=1), True, False)
         self.agents_in_transit = defaultdict(self._return_0)
         self.last_agent_transits = defaultdict(self._return_none)
         occupied_states, occupied_states_counts = np.unique(self.S, return_counts=True, axis=0)
@@ -116,11 +125,15 @@ class roadGridOnline:
     def _return_none(self):
         return None
 
+    def get_neighbours(self, agent, method="local"):
+        neighbours = np.array([])  # list of indices for drivers
+        return neighbours
+
     def step(self, actions, drivers):
         # pre-process actions
         actions = actions.flatten()
         counts = np.bincount(actions, minlength=self.n_actions)
-        self.actions_taken[self.base_state[0], self.base_state[1]] += counts
+        self.actions_taken[int(self.base_state[0]), int(self.base_state[1])] += counts
 
         ema_coefficient = 0.9
         pct_counts = counts / counts.sum()
@@ -168,7 +181,8 @@ class roadGridOnline:
             state_ = None  # if terminated else torch.tensor(observation, dtype=torch.float32, device=device)
             reward = 0 if terminated else -rewards[i]
             reward = torch.tensor([reward], dtype=torch.float32, device=device)
-            truncated = False
+            self.step_counter[n] += 1
+            truncated = True if self.step_counter[n] > self.timeout else False
             self.done[n] = terminated or truncated
             self.stored_transitions[n] = {
                 "state": state,
@@ -176,17 +190,33 @@ class roadGridOnline:
                 "next_state": state_,
                 "reward": reward
             }
-            self.step_counter[n] += 1
+            if self.done[n]:
+                trip_length = int(self.step_counter[n])
+                trip_time = float(self.T[n])
+                self.average_trip_time = ema_coefficient * self.average_trip_time + \
+                                         (1 - ema_coefficient) * (trip_time - self.trips[int(n)][-1][1])
+                destination = self.destinations[n]
+                self.trips[int(n)].append(tuple([trip_length, trip_time, destination]))
+                if self.episode_method == "continuous":
+                    self.assign_next_destination(n, method=self.next_destination_method)
+
+        self.reached_destinations = (self.S == self.destinations).all(axis=1)
 
         # determine terminated agents, the fastest agents, and base state
-        self.reached_destinations = (self.S == self.destinations).all(axis=1)
         done = False
-        fastest_travel_time = self.T.min() * 1.05  # 5% threshold to evaluate the next agents that travel
-        fastest_agents = self.T <= fastest_travel_time
-        uni = np.unique(self.S[fastest_agents], axis=0)
-        self.base_state = tuple(uni[np.random.randint(len(uni))])
-        self.agents_at_base_state = np.where((self.S == self.base_state).all(axis=1), True,
-                                             False) * fastest_agents
+        if self.episode_method == "fixed_step":
+            done = (self.done.sum() == self.n_agents)
+            if done:
+                pass
+            else:
+                # 5% threshold to evaluate the next agents that travel
+                # self.T is indexed by the agents that are not done, to find the minimum
+                fastest_travel_time = self.T[np.logical_not(self.done)].min() * 1.05
+                fastest_agents = self.T <= fastest_travel_time * np.logical_not(self.done)
+                uni = np.unique(self.S[fastest_agents], axis=0)
+                self.base_state = tuple(uni[np.random.randint(len(uni))])
+                self.agents_at_base_state = np.where((self.S == self.base_state).all(axis=1), True,
+                                                     False) * fastest_agents
 
         # update agents in transit, and complete transitions of agents in transit
         base_state_indices = np.argwhere(self.agents_at_base_state == True)
@@ -197,23 +227,14 @@ class roadGridOnline:
             edge = self.last_agent_transits[int(n)]
             self.agents_in_transit[edge] -= 1
             state_ = torch.tensor(complete_state, dtype=torch.float32, device=device)
-            self.stored_transitions[int(n)]["next_state"] = state_
-            transitions.append((int(n), self.stored_transitions[int(n)]))
+            if int(n) in self.stored_transitions.keys():
+                self.stored_transitions[int(n)]["next_state"] = state_
+                transitions.append((int(n), self.stored_transitions[int(n)]))
             self.current_state[int(n)] = complete_state
 
-        finished_indices = np.argwhere((self.reached_destinations * fastest_agents) == True)
-        for n in finished_indices:
-            trip_length = int(self.step_counter[n])
-            trip_time = float(self.T[n])
-            self.average_trip_time = ema_coefficient * self.average_trip_time + \
-                                     (1 - ema_coefficient) * (trip_time - self.trips[int(n)][-1][1])
-            destination = self.destinations[n]
-            # self.step_counter[n] = 0
-            # self.T[n] = 0
-            self.trips[int(n)].append(tuple([trip_length, trip_time, destination]))
-            self.assign_next_destination(n, method=self.next_destination_method)
+        self.agents_for_next_step = self.agents_at_base_state * np.logical_not(self.done)
 
-        return self.current_state, self.base_state, self.agents_at_base_state, transitions, done
+        return self.current_state, self.base_state, self.agents_for_next_step, transitions, done
 
     def assign_next_destination(self, agent, method="random"):
         if method == "commute":
