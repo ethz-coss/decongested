@@ -1,6 +1,6 @@
 import os
 
-SAVE_PATH = "/cluster/scratch/ccarissimo/decongested"
+SAVE_PATH = "/cluster/scratch/ccarissimo/decongested/federated"
 N_EPISODES = 400
 N_ITER = 6400
 IOT_NODES = False
